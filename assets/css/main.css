@@ -1,0 +1,203 @@
+
+/* 
+    Site-wide rules 
+*/
+
+* {
+    outline: none;
+    font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";
+    margin: 0;
+}
+
+:root {
+    --primary-color: #cd4e4e;
+    --secondary-color: #252525;
+    --tertiary-color: #1c1c1c;
+    --kinda-white: #f5f5f5;
+    --background-color: #353ebd;
+
+    --primary-text-color: #fff;
+}
+
+html {
+    background: var(--tertiary-color);
+    height: 100%;
+    overflow-x: hidden;
+}
+
+body {
+    color: white;
+    background-color: var(--tertiary-color);
+}
+
+#page-content {
+    margin-top: 30px;
+}
+
+.container {
+    padding: 0 15px;
+    margin: 0 auto;
+}
+
+#wrapper {
+    min-height: 100%;
+    padding-bottom: 100;
+    position: relative;
+}
+
+@supports (-moz-appearance: none) {
+    #wrapper {
+        min-height: 100vh;
+    }
+}
+
+/*
+    Header CSS
+*/
+
+header {
+    background-color: var(--secondary-color);
+}
+
+.header-bar {
+    font-size: 2rem;
+    justify-content: space-between;
+}
+
+.navbar-collapse {
+    flex-direction: row-reverse;
+}
+
+.navbar-brand {
+    display: inline-block;
+    font-size: 1.25rem;
+    line-height: inherit;
+}
+
+@media (max-width: 992px) {
+    .nav-item {
+        margin-left: auto;
+        margin-right: auto;
+    }
+}
+
+.logo {
+    transition: .2s;
+}
+
+.logo:hover {
+    transform: scale(1.1);
+}
+
+.nav-link {
+    transition: .2s;
+}
+
+.nav-link:hover {
+    transform: scale(1.1);
+}
+
+.nav-link.active {
+    transform: scale(1.1);
+}
+
+/* 
+    Footer 
+*/
+
+footer {
+    background-color: var(--secondary-color);
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    min-height: 60px;
+    height: auto;
+    display: flex;
+}
+
+footer .copyright {
+    align-self: center;
+    display: flex;
+}
+
+footer .additional {
+    display: flex;
+    font-size: 10px;
+    vertical-align: center;
+    text-align: right;
+    align-self: center;
+    width: 236.7px;
+}
+
+@media only screen and (max-width: 1024px) {
+    footer .container {
+        flex-wrap: wrap;
+    }
+
+    footer .copyright {
+        justify-content: center;
+        text-align: center;
+    }
+
+    footer .additional {
+        text-align: center;
+        align-self: center;
+        justify-content: center;
+        width: 100%;
+    }
+}
+
+/*
+    Blocker for Internet Explorer Users
+*/
+
+#ie-block {
+    display: none;
+}
+
+.ie-block-content {
+    display: none;
+}
+
+@media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
+
+    #ie-block {
+        display: block;
+        position: fixed;
+        width: 100%;
+        top: 0;
+        left: 0;
+        height: 100%;
+        z-index: 1000000000;
+        background-color: #1c1c1c;;
+    }
+
+    .ie-block-content {
+        display: block;
+        margin: 30px;
+        position: absolute;
+        top: 30%;
+        -ms-transform: translateY(-50%);
+        transform: translateY(-50%);
+    }
+
+    .ie-block-image {
+        transition: .2s;
+        height: 100px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .ie-block-image:hover {
+        transition: .2s;
+        transform: scale(1.1);
+    }
+}
+
+/*
+    Utility CSS
+*/
+
+.divider-grey {
+    box-shadow: inset 0 -4px 0 var(--secondary-color);
+}
