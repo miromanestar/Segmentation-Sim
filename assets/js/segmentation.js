@@ -4,8 +4,9 @@ $(document).ready(function() {
 });
 
 var Sim =  {
-    segments: [],
+    segments: { length: 0, identifier: 0, items: {} },
     size: 0,
+    max: 0,
 
     parseSegmentForm(formData) {
         let segment = {
@@ -18,12 +19,19 @@ var Sim =  {
         segment.offset = parseInt(formData[0].value);
         segment.size = parseInt(formData[1].value);
         segment.direction = formData[2].value;
-        segment.number = this.segments.length;
+        segment.number = this.segments.identifier;
 
         this.addSegment(segment);
     },
 
     addSegment(segment) {
+        let check = this.checkBounds(segment);
+        if (!check.result) {
+            alert(check.msg);
+            return;
+        }
+            
+
         if (this.segments.length === 0) {
             $('#seg-table').append(`
             <thead>
@@ -37,7 +45,7 @@ var Sim =  {
             <tbody>
             </tbody>
             `);
-            $('#seg-table-area .alert').addClass('hide-seg-table-alert');
+            $('#seg-table-area .no-segs-msg').addClass('hide-seg-table-alert');
             $('#seg-table-area table div').hide();
         }
 
@@ -50,16 +58,53 @@ var Sim =  {
         </tr>
         `);
 
-        this.segments.push(segment);
+        let start = segment.direction === 'Positive' ? segment.offset : segment.offset - segment.size;
+        let end = start + segment.size;
+        if (end > this.max)
+            this.max = end;
+        $('#pas-input').attr('min', this.max);
 
+        this.segments.items[segment.number] = segment;
+        this.segments.length++;
+        this.segments.identifier++;
         this.drawSegment(segment);
+        $.fancybox.close();
+    },
 
+    checkBounds(s) {
+        let start = s.direction === 'Positive' ? s.offset : s.offset - s.size;
+        let end = start + s.size;
+
+        for (let segno in this.segments.items) {
+            let seg = this.segments.items[segno]
+            let seg_start = seg.direction === 'Positive' ? seg.offset : seg.offset - seg.size;
+            let seg_end = seg_start + seg.size;
+
+            if (start < seg_end && seg_start < end) {
+                    return {
+                        result: false,
+                        msg: `Segment bounds overlaps with segment ${ seg.number }`
+                    }
+            }
+
+            if (end > this.size || start > this.size) {
+                return {
+                    result: false,
+                    msg: `Segment goes beyond length of address space`
+                }
+            }
+        }
+
+        return {
+            result: true,
+            msg: `Segment ${ s.number } fits within bounds`
+        };
     },
 
     drawSegments() {
         $('#pas-area').empty();
-        for (let s of this.segments)
-            this.drawSegment(s);
+        for (let s in this.segments.items)
+            this.drawSegment(this.segments.items[s]);
     },
 
     drawSegment(s) {
@@ -94,10 +139,24 @@ var Sim =  {
     deleteSegment(number) {
         $(`#pas-seg_${ number }, #pas-seg-lightbox_${ number }`).remove();
         $(`#seg-table_${ number }`).remove();
-        this.segments = this.segments.splice(number, number);
+
+        delete this.segments.items[number];
+        this.segments.length--;
+
+        let tMax = 0;
+        for (let s in this.segments.items) {
+            let segment =this.segments.items[s]
+            let start = segment.direction === 'Positive' ? segment.offset : segment.offset - segment.size;
+            let end = start + segment.size;
+
+            if (end > tMax)
+                tMax = end;
+        }
+        this.max = tMax;
+        $('#pas-input').attr('min', this.max);
 
         if (this.segments.length === 0) {
-            $('#seg-table-area .alert').removeClass('hide-seg-table-alert');
+            $('#seg-table-area .no-segs-msg').removeClass('hide-seg-table-alert');
             $(`#seg-table thead, #seg-table tbody`).remove();
         }
 
@@ -106,11 +165,32 @@ var Sim =  {
 
     toggleSegBtn(input) {
         this.size = input.val();
-        if (input.val() > 0)
+        if (input.val() > 0) {
             $('.add-seg-btn').removeClass('disabled');
-        else
+            $('#pas-area').empty()
+        } else {
             $('.add-seg-btn').addClass('disabled');
+            $('#pas-area').empty().append(`
+                <div class="pas-null display-4">Please enter a PAS length</div>
+            `);
+
+            return;
+        }
         
         this.drawSegments();
+        this.drawAxis();
+    },
+
+    drawAxis() {
+        let length = $('#pas-area').width();
+
+        for (let i = 1; i < 10; i++) {
+            let realPos = (i * .1) * this.size;
+            let relativePos = (realPos / this.size) * length;
+
+            $('#pas-area').append(`
+                <div class="pas-axis" style="left: ${ relativePos - 6 };">${ Math.round(realPos) }</div>
+            `);
+        }
     }
 };

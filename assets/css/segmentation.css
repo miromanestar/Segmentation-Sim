@@ -34,15 +34,20 @@
     height: 250px;
     background-color: var(--secondary-color);
     overflow-x: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .pas-seg {
-    height: 100%;
+    height: 90%;
     position: absolute;
     display: flex;
     justify-content: center;
     align-items: center;
     cursor: pointer;
+    top: 0;
+    border: 1px solid white;
 }
 
 .seg-identifier {
@@ -60,6 +65,12 @@
     height: 250px;
 }
 
+.pas-axis {
+    position: absolute;
+    margin-top: 30px;
+    bottom: 0;
+}
+
 /*
     Segmentation Table CSS
 */
@@ -72,7 +83,11 @@
     width: 100%;
 }
 
-#seg-table-area .alert {
+#seg-table tr {
+    cursor: pointer;
+}
+
+#seg-table-area .no-segs-msg {
     transition: .2s;
 }
 
