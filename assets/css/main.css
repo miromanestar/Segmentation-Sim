@@ -51,6 +51,14 @@ body {
     }
 }
 
+.btn {
+    transition: .2s;
+}
+
+.btn:hover {
+    transform: scale(1.05);
+}
+
 /*
     Header CSS
 */
@@ -86,7 +94,11 @@ header {
 }
 
 .logo:hover {
-    transform: scale(1.1);
+    transform: scale(1.05);
+}
+
+.logo img {
+    width: 1.8rem;
 }
 
 .nav-link {
@@ -200,4 +212,114 @@ footer .additional {
 
 .divider-grey {
     box-shadow: inset 0 -4px 0 var(--secondary-color);
+}
+
+/*
+    Input CSS
+*/
+
+input[type="text"] {
+    width: 100%;
+    line-height: 3;
+    background-color: var(--secondary-color);
+    border: none;
+    color: #fff;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+input[type="email"] {
+    width: 100%;
+    line-height: 3;
+    background-color: var(--secondary-color);
+    border: none;
+    color: #fff;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+input:focus {
+    outline: none;
+}
+
+.minimal-input {
+    width: fit-content;
+    line-height: 3;
+    background-color: var(--secondary-color);
+    border: none;
+    color: #fff;
+    padding-left: 10px;
+    padding-right: 10px;
+    border-radius: 3px;
+    outline: none;
+    -webkit-appearance: none;
+    -moz-appearance: textfield;
+}
+
+.minimal-input.form-control {
+    height: 3.1rem;
+}
+
+.minimal-input:focus {
+    background-color: var(--secondary-color);
+    color: #fff;
+    border: none;
+}
+
+.select-css {
+    width: 140px;
+    display: inline;
+	font-size: 16px;
+	font-family: sans-serif;
+	font-weight: 300;
+	color: #fff;
+    line-height: 3;
+    height: 3.5rem;
+    padding-left: 10px;
+    padding-right: 30px;
+	box-sizing: border-box;
+	margin: 0;
+	border: none;
+	box-shadow: none;
+	border-radius: .5em;
+	-moz-appearance: none;
+	-webkit-appearance: none;
+	appearance: none;
+	background-color: var(--secondary-color);
+	background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23007CB2%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E');
+	background-repeat: no-repeat, repeat;
+	background-position: right .7em top 55%, 0 0;
+    background-size: .65em auto, 100%;
+    border-radius: 3px;
+}
+
+.select-css::-ms-expand {
+	display: none;
+}
+.select-css:hover {
+	border-color: none;
+}
+.select-css:focus {
+	border-color: none;
+	box-shadow: none;
+	box-shadow: none -moz-mac-focusring;
+    outline: none;
+    background-color: var(--secondary-color);
+    color: #fff;
+    border: none;
+}
+.select-css option {
+	font-weight:normal;
+}
+
+/* Chrome, Safari, Edge, Opera */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+input[type=number] {
+  -moz-appearance: textfield;
 }

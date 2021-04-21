@@ -1,0 +1,102 @@
+/*
+    Sim config CSS
+*/
+
+#sim-config {
+    display: flex;
+    justify-content: space-between;
+    height: 50px;
+    margin-bottom: 20px;
+}
+
+#add-segment {
+    background-color: var(--tertiary-color);
+}
+
+#segment-form input, #segment-form select {
+    width: 100%;
+    margin-top: 10px;
+}
+
+#segment-form .btn {
+    width: 100%;
+}
+
+/* 
+    Sim display CSS
+*/
+
+/* Physical Address Area */
+#pas-area {
+    width: 100vw;
+    position: absolute;
+    left: 0;
+    height: 250px;
+    background-color: var(--secondary-color);
+    overflow-x: hidden;
+}
+
+.pas-seg {
+    height: 100%;
+    position: absolute;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+}
+
+.seg-identifier {
+    display: flex;
+    font-weight: bold;
+    font-size: 2rem;
+}
+
+.pas-seg-lightbox {
+    background-color: var(--tertiary-color);
+    
+}
+
+.pas-divider {
+    height: 250px;
+}
+
+/*
+    Segmentation Table CSS
+*/
+
+#seg-table-area {
+    margin-top: 30px;
+}
+
+#seg-table {
+    width: 100%;
+}
+
+#seg-table-area .alert {
+    transition: .2s;
+}
+
+.hide-seg-table-alert {
+    height: 0;
+    margin: 0;
+    padding: 0;
+    visibility: hidden;
+}
+
+.seg-table-area div {
+    transition: .2s;
+}
+
+.hide-seg-table-alert div {
+    height: 0;
+    margin: 0;
+    padding: 0;
+    visibility: hidden;
+}
+
+/* Bootstrap Striped Table Override
+.table>:not(caption)>*>* {
+    background-color: var(--secondary-color);
+    box-shadow: inset 0 0 0 9999px var(--tertiary-color);
+}
+*/
