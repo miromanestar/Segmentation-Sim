@@ -77,26 +77,53 @@ var Sim = class {
     //Changes properties of a given segment given a segment number
     changeBase(sno, base) {
         if (base) {
-            $(`#pas-seg_${ sno }`).remove();
+            let temp = this.segments.items[sno];
             this.segments.items[sno].base = base;
-            this.pSegment(this.segments.items[sno]);
+
+            let check = this.checkBounds(this.segments.items[sno]);
+
+            if (check.result) {
+                $(`#pas-seg_${ sno }`).remove();
+                this.pSegment(this.segments.items[sno]);
+            } else {
+                alert(check.msg);
+                this.segments.items[sno] = temp;
+            }
         }
     }
 
     changeSize(sno, size) {
         if (size) {
-            $(`#pas-seg_${ sno }`).remove();
+            let temp = this.segments.items[sno];
             this.segments.items[sno].size = size;
-            this.pSegment(this.segments.items[sno]);
+
+            let check = this.checkBounds(this.segments.items[sno]);
+
+            if (check.result) {
+                $(`#pas-seg_${ sno }`).remove();
+                this.pSegment(this.segments.items[sno]);
+            } else {
+                alert(check.msg);
+                this.segments.items[sno] = temp;
+            }
         }
     }
 
     changeDir(sno, dir) {
         if (dir) {
-            $(`#pas-seg_${ sno }, #vas-seg_${ sno }`).remove();
+            let temp = this.segments.items[sno];
             this.segments.items[sno].direction = dir;
-            this.pSegment(this.segments.items[sno]);
-            this.vSegment(this.segments.items[sno])
+
+            let check = this.checkBounds(this.segments.items[sno]);
+
+            if (check.result) {
+                $(`#pas-seg_${ sno }, #vas-seg_${ sno }`).remove();
+                this.pSegment(this.segments.items[sno]);
+                this.vSegment(this.segments.items[sno])
+            } else {
+                alert(check.msg);
+                this.segments.items[sno] = temp;
+            }
         }
     }
 
@@ -259,6 +286,41 @@ var Sim = class {
 
         let sno = bi.substr(0, 2);
         console.log(sno);
+    }
+
+    //Checks bounds within the PAS
+    checkBounds(s) {
+        let start = s.direction === 'Positive' ? s.base : s.base - s.size;
+        let end = start + s.size;
+        let size = Math.pow(2, this.pLength);
+
+        for (let segno in this.segments.items) {
+            if (parseInt(segno) === parseInt(s.number))
+                continue;
+
+            let seg = this.segments.items[segno]
+            let seg_start = seg.direction === 'Positive' ? seg.base : seg.base - seg.size;
+            let seg_end = seg_start + seg.size;
+
+            if (start < seg_end && seg_start < end) {
+                    return {
+                        result: false,
+                        msg: `Segment ${ binary(s.number, 2) } bounds overlaps with segment ${ binary(seg.number, 2) }`
+                    }
+            }
+
+            if (end > size || start > size) {
+                return {
+                    result: false,
+                    msg: `Segment ${ binary(s.number, 2) } goes beyond length of address space`
+                }
+            }
+        }
+
+        return {
+            result: true,
+            msg: `Segment ${ binary(s.number, 2) } fits within bounds`
+        };
     }
 
     //Sometimes people like to change the size of the screen... grrr
