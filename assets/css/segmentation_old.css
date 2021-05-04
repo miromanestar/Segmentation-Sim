@@ -27,7 +27,7 @@
 */
 
 /* Physical Address Area */
-.memory-area {
+#pas-area {
     width: 100vw;
     position: absolute;
     left: 0;
@@ -39,7 +39,7 @@
     align-items: center;
 }
 
-.seg {
+.pas-seg {
     height: 90%;
     position: absolute;
     display: flex;
@@ -61,24 +61,14 @@
     
 }
 
-.sim-divider {
+.pas-divider {
     height: 250px;
 }
 
-.sim-axis {
+.pas-axis {
     position: absolute;
     margin-top: 30px;
     bottom: 0;
-    z-index: 3;
-}
-
-.axis-separator {
-    position: absolute;
-    top: 0;
-    height: 90%;
-    width: 2px;
-    background-color: rgba(255, 255, 255, .3);
-    z-index: 2;
 }
 
 /*
@@ -86,17 +76,19 @@
 */
 
 #seg-table-area {
-    margin-top: 20px;
-    margin-left: auto;
-    margin-right: auto;
+    margin-top: 30px;
 }
 
 #seg-table {
     width: 100%;
 }
 
-.selected-row {
-    filter: brightness(1.5);
+#seg-table tr {
+    cursor: pointer;
+}
+
+#seg-table-area .no-segs-msg {
+    transition: .2s;
 }
 
 .hide-seg-table-alert {
@@ -117,8 +109,9 @@
     visibility: hidden;
 }
 
-/* Bootstrap Striped Table Override */
+/* Bootstrap Striped Table Override
 .table>:not(caption)>*>* {
     background-color: var(--secondary-color);
     box-shadow: inset 0 0 0 9999px var(--tertiary-color);
 }
+*/

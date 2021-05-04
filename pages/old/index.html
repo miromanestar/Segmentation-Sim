@@ -1,0 +1,48 @@
+<link rel="stylesheet" href="assets/css/segmentation_old.css" />
+<script src="assets/js/segmentation_old.js"></script>
+
+
+<div id="sim-config">
+    <span><input id="pas-input" type="number" min="0" max="512" class="minimal-input" oninput="Sim.toggleSegBtn($(this))" placeholder="PAS Size (Bytes)" style="width: 150px;" required/></span>
+    <button data-fancybox data-src="#add-segment" type="button" class=" add-seg-btn btn btn-success ms-3 disabled">Add Segment</button>
+</div>
+
+<div id="add-segment" style="display: none;">
+    <div class="overlay-content">
+        <form id="segment-form" onsubmit="Sim.parseSegmentForm($('#segment-form').serializeArray()); return false;">
+            <div>
+                <label>Segment Offset</label> <br />
+                <input name="segment-offset" class="minimal-input" type="number" min="1"  step="1" placeholder="Segment Offset" required />
+            </div>
+            <br />
+            <div>
+                <label>Segment Size</label> <br />
+                <input name="segment-size" class="minimal-input" type="number" min="1" step="1" placeholder="Segment Size" required />
+            </div>
+            <br />
+            <div>
+                <label>Growth Direction</label> </br required/>
+                <select class="select-css" name="segment-direction">
+                    <option>Positive</option>
+                    <option>Negative</option>
+                </select>
+            </div>
+            <br />
+            <button type="submit" class="btn btn-success">Add Segment</button>
+        </form>
+    </div>
+</div>
+
+<div id="pas-area">
+    <div class="pas-null display-4">Please enter a PAS length</div>
+</div>
+<div class="pas-divider"></div>
+
+<div id="seg-table-area" class="w-50 text-center">
+    <h3 class="display-4">Segment Table</h3>
+    <div class="no-segs-msg text-center">
+        <div>No segments currently exist.</div>
+        <div class="add-seg-btn btn btn-success mt-3 disabled" role="button" data-fancybox data-src="#add-segment">Create one</div>
+    </div>
+    <table id="seg-table" class="table table-dark table-striped table-hover"></table>
+</div>
