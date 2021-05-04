@@ -93,6 +93,11 @@
 
 #seg-table {
     width: 100%;
+    text-align: center;
+}
+
+#seg-table td {
+    vertical-align: middle;
 }
 
 .selected-row {

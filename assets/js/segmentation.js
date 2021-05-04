@@ -12,13 +12,11 @@ var Sim = class {
             items: {} 
         }
 
-        this.drawAxis();
-
         $('.vas-null').remove();
         //Create the 3 default segments
         this.createSegment('Code', 8_000, 2_000, 'Positive', 0);
-        this.createSegment('Stack', 10_000, 2_000, 'Positive', 1);
-        this.createSegment('Heap', 16_000, 2_000, 'Negative', 3);
+        this.createSegment('Heap', 10_000, 2_000, 'Positive', 1);
+        this.createSegment('Stack', 16_000, 2_000, 'Negative', 3);
 
 
         window.addEventListener('resize', ev => this.handleResize());
@@ -48,8 +46,8 @@ var Sim = class {
         <tr id="seg-table_${ number }">
             <td>${ name }</td>
             <td>${ binary(number, 2) }</td>
-            <td><input id="base-input_${ number }" value="${ base }" type="number" min="0" class="minimal-input" oninput="sim.changeBase(${ number }, $(this).val());" placeholder="Base" style="width: 150px;" /></td>
-            <td><input id="size-input_${ number }" value="${ size }" type="number" min="0" class="minimal-input" oninput="sim.changeSize(${ number }, $(this).val());" placeholder="Size" style="width: 150px;" /></td>
+            <td><input id="base-input_${ number }" value="${ base }" type="number" min="0" class="minimal-input" onchange="sim.changeBase(${ number }, $(this).val());" placeholder="Base" style="width: 150px;" /></td>
+            <td><input id="size-input_${ number }" value="${ size }" type="number" min="0" class="minimal-input" onchange="sim.changeSize(${ number }, $(this).val());" placeholder="Size" style="width: 150px;" /></td>
             <td>
                 <select class="select-css" name="segment-direction" onchange="sim.changeDir(${ number }, $(this).val());" id="dir-input_${ number }">
                     <option>Positive</option>
@@ -77,52 +75,54 @@ var Sim = class {
     //Changes properties of a given segment given a segment number
     changeBase(sno, base) {
         if (base) {
-            let temp = this.segments.items[sno];
+            let temp = this.segments.items[sno].base;
             this.segments.items[sno].base = base;
 
             let check = this.checkBounds(this.segments.items[sno]);
 
             if (check.result) {
                 $(`#pas-seg_${ sno }`).remove();
-                this.pSegment(this.segments.items[sno]);
+                this.drawSegments();
             } else {
                 alert(check.msg);
-                this.segments.items[sno] = temp;
+                $(`#base-input_${ sno }`).val(temp)
+                this.segments.items[sno].base = temp;
             }
         }
     }
 
     changeSize(sno, size) {
         if (size) {
-            let temp = this.segments.items[sno];
+            let temp = this.segments.items[sno].size;
             this.segments.items[sno].size = size;
 
             let check = this.checkBounds(this.segments.items[sno]);
 
             if (check.result) {
                 $(`#pas-seg_${ sno }`).remove();
-                this.pSegment(this.segments.items[sno]);
+                this.drawSegments();
             } else {
                 alert(check.msg);
-                this.segments.items[sno] = temp;
+                $(`#size-input_${ sno }`).val(temp)
+                this.segments.items[sno].size = temp;
             }
         }
     }
 
     changeDir(sno, dir) {
         if (dir) {
-            let temp = this.segments.items[sno];
+            let temp = this.segments.items[sno].direction;
             this.segments.items[sno].direction = dir;
 
             let check = this.checkBounds(this.segments.items[sno]);
 
             if (check.result) {
                 $(`#pas-seg_${ sno }, #vas-seg_${ sno }`).remove();
-                this.pSegment(this.segments.items[sno]);
-                this.vSegment(this.segments.items[sno])
+                this.drawSegments();
             } else {
                 alert(check.msg);
-                this.segments.items[sno] = temp;
+                $(`#dir-input_${ sno }`).val(temp)
+                this.segments.items[sno].direction = temp;
             }
         }
     }
@@ -163,20 +163,23 @@ var Sim = class {
 
     //Draws segments in the virtual address space
     vSegment(s) {
+        if (!this.vLength)
+            return;
+
         let length = $('#vas-area').width();
 
         let vasSize = 4;
         let realPos = (s.number * .25) * vasSize;
         let relativePos = (realPos / vasSize) * length;
         
-        //Calculates the space between each "segment" grid in the VAS
+        //Calculates the space between each "segment" grid in the VAS and figures the relative size of each virtual segment
         let calcRelSize = () => {
             let nextPos = ( (s.number + 1) * .25) * vasSize;
             let nextRelativePos = (nextPos / vasSize) * length;
 
-
-
-            return nextRelativePos - relativePos;
+            let actualWidth = nextRelativePos - relativePos;
+            let widthRatio = parseInt(s.size) / Math.pow(2, parseInt(this.vLength) - 2);
+            return actualWidth * widthRatio;
         };
 
         let relativeSize = calcRelSize();
@@ -213,17 +216,18 @@ var Sim = class {
 
         let size = Math.pow(2, this.pLength);
 
-        for (let i = 0; i <= 9; i++) {
-            let realPos = (i * .1) * size;
+        for (let i = 0; i <= 8; i++) {
+            let realPos = (i * .125) * size;
             let relativePos = (realPos / size) * length;
 
+            let style = `left: ${ relativePos - 6 };`;
             if (i === 0)
-                relativePos += 15;
-            else if (i === 10)
-                relativePos -= 50;
+                style = `left: ${ relativePos + 10 };`;
+            else if (i === 8)
+                style = `right: ${ 30 };`;
 
             $('#pas-area').append(`
-                <div class="sim-axis" style="left: ${ relativePos - 6 };">${ Math.round(realPos) }</div>
+                <div class="sim-axis" style="${ style };">${ Math.round(realPos) }</div>
             `);
         }
     }
@@ -231,6 +235,13 @@ var Sim = class {
     //Draw the virtual address space axis
     vAxis() {
         $('#vas-area .sim-axis, #vas-area .axis-separator').remove();
+
+        if (this.vLength) {
+            $('#vas-area .mem-null').hide();
+        } else {
+            $('#vas-area .mem-null').show();
+            return;
+        }
 
         let length = $('#vas-area').width();
         let vasSize = 4;
@@ -268,16 +279,27 @@ var Sim = class {
             alert(`Your VA length should be less than your PA length\nVA Length: ${ num }`);
             $('#vas-input').val(this.vLength);
             return;
+        } else if (num <= 2) {
+            alert('Your VA length must be greater than 2 (Because the first two bits are used to identify segment');
+            $('#vas-input').val(this.vLength);
+            return;
         }
-        
         this.vLength = num;
+        this.vAxis();
+        this.drawSegments();
     }
 
     //Translates a virtual address into a physical address and highlights the appropriate segments to show intersections
     translateAddress(num) {
+        $('.translate-seg').remove();
         if (!this.vLength) {
             alert('You must enter a virtual address length');
             $('#translation-input').val('');
+            return;
+        }
+
+        if (num === '') {
+            $('#translated-address').html('N/A');
             return;
         }
 
@@ -285,22 +307,52 @@ var Sim = class {
         let bi = binary(num, this.vLength);
 
         let sno = bi.substr(0, 2);
-        console.log(sno);
+        let offset = parseInt(bi.substr(2), 2);
+
+        try {
+            this.drawTranslatedAddress(sno, offset);
+        } catch (e) {
+            $('#translated-address').html('Segfault');
+        }
+    }
+
+    drawTranslatedAddress(sno, offset) {
+        //Draw the "translated" address within the PAS
+        let base = parseInt(this.segments.items[parseInt(sno, 2)].base)
+
+        //The physical address given the virtual address
+        let pAddress = this.segments.items[parseInt(sno, 2)].direction === 'Positive' ? base + offset : base - offset;
+        $('#translated-address').html(pAddress);
+
+        let relativePasPos = pAddress / Math.pow(2, parseInt(this.pLength)) * $('#pas-area').width();
+        $('#pas-area').append(`
+        <div class="translate-seg seg" id="pas-translate_${ parseInt(sno, 2) }" style="left: ${ relativePasPos }; width: 5px; background-color: lightblue; z-index: 4;">
+            <!-- <div class="seg-identifier">${ binary(sno, 2) }</div> -->
+        </div>
+        `);
+
+        //Draw the "translated" address within the VAS
+        let widthRatio = parseInt(s.size) / Math.pow(2, parseInt(this.vLength) - 2);
+        $('#vas-area').append(`
+        <div class="translate-seg seg" id="pas-translate_${ parseInt(sno, 2) }" style="left: ${ relativePasPos }; width: 5px; background-color: lightblue; z-index: 4;">
+            <!-- <div class="seg-identifier">${ binary(sno, 2) }</div> -->
+        </div>
+        `);
     }
 
     //Checks bounds within the PAS
     checkBounds(s) {
-        let start = s.direction === 'Positive' ? s.base : s.base - s.size;
-        let end = start + s.size;
-        let size = Math.pow(2, this.pLength);
+        let start = s.direction === 'Positive' ? parseInt(s.base) : parseInt(s.base) - parseInt(s.size);
+        let end = start + parseInt(s.size);
+        let size = Math.pow(2, parseInt(this.pLength));
 
         for (let segno in this.segments.items) {
             if (parseInt(segno) === parseInt(s.number))
                 continue;
 
             let seg = this.segments.items[segno]
-            let seg_start = seg.direction === 'Positive' ? seg.base : seg.base - seg.size;
-            let seg_end = seg_start + seg.size;
+            let seg_start = seg.direction === 'Positive' ? parseInt(seg.base) : parseInt(seg.base) - parseInt(seg.size);
+            let seg_end = seg_start + parseInt(seg.size);
 
             if (start < seg_end && seg_start < end) {
                     return {

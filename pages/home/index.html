@@ -8,17 +8,18 @@
         <input id="pas-input" type="number" min="0" max="512" class="minimal-input" oninput="sim.setPas($(this).val())" placeholder="PA Length (Bits)" style="width: 150px;" required/>
         &nbsp;
         <label>VA Length: </label>
-        <input id="vas-input" type="number" min="0" max="512" class="minimal-input" oninput="sim.setVas($(this).val())" placeholder="VA Length (Bits)" style="width: 150px;" required/>
+        <input id="vas-input" type="number" min="0" max="512" class="minimal-input" onchange="sim.setVas($(this).val())" placeholder="VA Length (Bits)" style="width: 150px;" required/>
     </span>
 
     <span>
         <label>Address Translation: </label>
-        <input id="translation-input" type="number" min="0" max="512" class="minimal-input" oninput="sim.translateAddress($(this).val())" placeholder="Virtual Address" style="width: 150px;" required/>
+        <input id="translation-input" type="number" min="0" class="minimal-input" oninput="sim.translateAddress($(this).val())" placeholder="Virtual Address" style="width: 150px;" required/>
+        &nbsp; <label>Address: <span id="translated-address" style="width: 150px;">N/A</span></label>
     </span>
 </div>
 
 <div id="vas-area" class="memory-area">
-    <!-- <div class="mem-null display-4">Virtual Address Space</div> -->
+    <div class="mem-null display-4">Pleae enter a virtual address length</div>
 </div>
 <div class="sim-divider mb-3"></div>
 
