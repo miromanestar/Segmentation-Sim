@@ -131,6 +131,7 @@ var Sim = class {
         $('.memory-area .seg').remove();
         for (let s in this.segments.items)
             this.drawSegment(this.segments.items[s]);
+        this.translateAddress($('#translation-input').val(), true); //The true silences alerts from the function
     }
 
     drawSegment(s) {
@@ -275,6 +276,11 @@ var Sim = class {
             alert('Please set a physical address length');
             $('#vas-input').val(this.vLength);
             return;
+        } else if (num === '') { 
+            this.vLength = num;
+            this.vAxis();
+            this.drawSegments();
+            return;
         } else if (num && parseInt(num) + 1 > parseInt(this.pLength)) {
             alert(`Your VA length should be less than your PA length\nVA Length: ${ num }`);
             $('#vas-input').val(this.vLength);
@@ -284,17 +290,37 @@ var Sim = class {
             $('#vas-input').val(this.vLength);
             return;
         }
+
+        //Total size (in bytes) of a virtual segment
+        let vSize = Math.pow(2, parseInt(num) - 2);
+        for (let s in this.segments.items) {
+            let seg = this.segments.items[s];
+
+            if (seg.size > vSize) {
+                alert(`Segment ${ binary(seg.number, 2) } is larger than your virtual address allows.\n
+                VA Length: ${ parseInt(num) - 2 }: ${ vSize }\n
+                VA Size: ${ vSize }\n
+                Segment Size: ${ seg.size }
+                `);
+                $('#vas-input').val(this.vLength);
+                return;
+            }
+        }
+
         this.vLength = num;
         this.vAxis();
         this.drawSegments();
     }
 
     //Translates a virtual address into a physical address and highlights the appropriate segments to show intersections
-    translateAddress(num) {
+    translateAddress(num, isSilent) {
         $('.translate-seg').remove();
         if (!this.vLength) {
-            alert('You must enter a virtual address length');
-            $('#translation-input').val('');
+            if (!isSilent) {
+                alert('You must enter a virtual address length');
+                $('#translation-input').val('');
+            }
+
             return;
         }
 
@@ -306,22 +332,44 @@ var Sim = class {
         num = parseInt(num);
         let bi = binary(num, this.vLength);
 
-        let sno = bi.substr(0, 2);
-        let offset = parseInt(bi.substr(2), 2);
+        let sno = bi.substr(0, 2); //Segment number
+        let offset = parseInt(bi.substr(2), 2); //The actual virtual address bit
+
+        console.log(sno, this.lastSelectedSegment);
+        if (sno !== this.lastSelectedSegment) {
+            $('#seg-table tr').removeClass('selected-seg');
+            $('.seg').removeClass('selected-seg');
+        }
 
         try {
             this.drawTranslatedAddress(sno, offset);
         } catch (e) {
             $('#translated-address').html('Segfault');
+            return;
         }
+
+        if (sno !== this.lastSelectedSegment) {
+            $(`#seg-table_${ parseInt(sno, 2) }`).addClass('selected-seg');
+            $(`#vas-seg_${ parseInt(sno, 2) }`).addClass('selected-seg');
+            $(`#pas-seg_${ parseInt(sno, 2) }`).addClass('selected-seg');
+        }
+
+        this.lastSelectedSegment = sno;
     }
 
     drawTranslatedAddress(sno, offset) {
         //Draw the "translated" address within the PAS
         let base = parseInt(this.segments.items[parseInt(sno, 2)].base)
+        let size = parseInt(this.segments.items[parseInt(sno, 2)].size)
 
         //The physical address given the virtual address
         let pAddress = this.segments.items[parseInt(sno, 2)].direction === 'Positive' ? base + offset : base - offset;
+
+        //Throw an error an exit function if the translated address is outside the bounds of a segment's physical bounds
+        if (this.segments.items[parseInt(sno, 2)].direction === 'Positive' ? pAddress > base + size : pAddress < base - size) {
+            throw 'pAddress out of bounds of a physical address';
+        }
+
         $('#translated-address').html(pAddress);
 
         let relativePasPos = pAddress / Math.pow(2, parseInt(this.pLength)) * $('#pas-area').width();
@@ -331,10 +379,19 @@ var Sim = class {
         </div>
         `);
 
-        //Draw the "translated" address within the VAS
-        let widthRatio = parseInt(s.size) / Math.pow(2, parseInt(this.vLength) - 2);
+        //Now let's draw the virtual address within the VAS
+        let relativeVasRatio = offset / parseInt(Math.pow(2, parseInt(this.vLength) - 2));
+        let relativeVasPos = $(`#vas-seg_${ parseInt(sno, 2) }`).width() * relativeVasRatio + parseFloat($(`#vas-seg_${ parseInt(sno, 2) }`).css('left'));
+        
+        if (this.segments.items[parseInt(sno, 2)].direction === 'Negative') {
+            let diff = relativeVasPos - parseFloat($(`#vas-seg_${ parseInt(sno, 2) }`).css('left'));
+            let end = parseFloat($(`#vas-seg_${ parseInt(sno, 2) }`).css('left')) + $(`#vas-seg_${ parseInt(sno, 2) }`).width();
+
+            relativeVasPos = end - diff - 6; //Extra 5 accounts for width of the element showing position 
+        }
+        
         $('#vas-area').append(`
-        <div class="translate-seg seg" id="pas-translate_${ parseInt(sno, 2) }" style="left: ${ relativePasPos }; width: 5px; background-color: lightblue; z-index: 4;">
+        <div class="translate-seg seg" id="vas-translate_${ parseInt(sno, 2) }" style="left: ${ relativeVasPos }; width: 5px; background-color: lightblue; z-index: 4;">
             <!-- <div class="seg-identifier">${ binary(sno, 2) }</div> -->
         </div>
         `);
@@ -366,6 +423,17 @@ var Sim = class {
                     result: false,
                     msg: `Segment ${ binary(s.number, 2) } goes beyond length of address space`
                 }
+            }
+        }
+
+        if (parseInt(s.size) > Math.pow(2, parseInt(this.vLength) - 2)) {
+            return {
+                result: false,
+                msg: `Segment ${ binary(s.number, 2) } is larger than your virtual address allows.\n
+                VA Length: ${ parseInt(this.vLength) - 2 }\n
+                VA Size: ${ Math.pow(2, parseInt(this.vLength) - 2) }\n
+                Segment Size: ${ s.size }
+                `
             }
         }
 

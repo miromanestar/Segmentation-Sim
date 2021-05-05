@@ -4,10 +4,10 @@
 
 <div id="sim-config">
     <span>
-        <label>PA Length: </label>
+        <label>PA Length (Bits): </label>
         <input id="pas-input" type="number" min="0" max="512" class="minimal-input" oninput="sim.setPas($(this).val())" placeholder="PA Length (Bits)" style="width: 150px;" required/>
         &nbsp;
-        <label>VA Length: </label>
+        <label>VA Length (Bits): </label>
         <input id="vas-input" type="number" min="0" max="512" class="minimal-input" onchange="sim.setVas($(this).val())" placeholder="VA Length (Bits)" style="width: 150px;" required/>
     </span>
 

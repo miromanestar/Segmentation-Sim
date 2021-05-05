@@ -100,8 +100,9 @@
     vertical-align: middle;
 }
 
-.selected-row {
+.selected-seg {
     filter: brightness(1.5);
+    transition: .2s;
 }
 
 .hide-seg-table-alert {
