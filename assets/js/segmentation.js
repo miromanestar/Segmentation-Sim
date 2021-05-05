@@ -8,7 +8,7 @@
 $(document).ready(function() {
     sim = new Sim();
     sim.createSegment('Code', 8_000, 2_048, 'Positive', 0);
-    sim.createSegment('Heap', 10_000, 2_048, 'Positive', 1);
+    sim.createSegment('Heap', 10_050, 2_048, 'Positive', 1);
     sim.createSegment('Stack', 16_000, 2_048, 'Negative', 2);
 
     $('#pas-input').val(16).change();
@@ -29,6 +29,21 @@ var Sim = class {
     }
 
     createSegment(name, base, size, direction, num) {
+        let number = num || this.segments.nextSegmentNo;
+        let segment = {
+            name: name,
+            number: number,
+            base: base,
+            size: size,
+            direction: direction
+        }
+
+        let check = this.checkBounds(segment);
+        if (!check.result) {
+            alert(check.msg);
+            return;
+        }
+
         if (this.segments.length === 0) {
             $('#seg-table').append(`
             <thead>
@@ -47,7 +62,6 @@ var Sim = class {
             $('#seg-table-area table div').hide();
         }
 
-        let number = num || this.segments.nextSegmentNo;
         $('#seg-table tbody').append(`
         <tr id="seg-table_${ number }">
             <td>${ name }</td>
@@ -63,13 +77,8 @@ var Sim = class {
         </tr>
         `);
 
-        this.segments.items[number] = {
-            name: name,
-            number: number,
-            base: base,
-            size: size,
-            direction: direction
-        }
+        this.segments.items[number] = segment
+
         this.segments.length++;
 
         if (!num)
