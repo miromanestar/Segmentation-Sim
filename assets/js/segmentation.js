@@ -395,10 +395,7 @@ var Sim = class {
             let diff = relativeVasPos - parseFloat($(`#vas-seg_${ parseInt(sno, 2) }`).css('left'));
             let end = parseFloat($(`#vas-seg_${ parseInt(sno, 2) }`).css('left')) + $(`#vas-seg_${ parseInt(sno, 2) }`).width();
 
-            relativeVasPos = end - diff - 6; //Extra 5 accounts for width of the element showing position 
-        } else {
-            //If positive
-            //relativeVasPos += 6;
+            relativeVasPos = end - diff;
         }
         
         $('#vas-area').append(`
