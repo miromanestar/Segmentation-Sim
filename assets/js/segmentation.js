@@ -1,3 +1,10 @@
+/*
+    Miro Manestar
+    Segmentation Simulator
+    CPTR-365 | Operating Systems | Professor Robert Ordonez
+    May 5, 2021
+*/
+
 $(document).ready(function() {
     sim = new Sim();
     sim.createSegment('Code', 8_000, 2_048, 'Positive', 0);
