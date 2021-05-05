@@ -9,7 +9,7 @@ $(document).ready(function() {
     sim = new Sim();
     sim.createSegment('Code', 8_000, 2_048, 'Positive', 0);
     sim.createSegment('Heap', 10_050, 2_048, 'Positive', 1);
-    sim.createSegment('Stack', 16_000, 1500, 'Negative', 2);
+    sim.createSegment('Stack', 16_000, 2_048, 'Negative', 2);
 
     $('#pas-input').val(16).change();
     $('#vas-input').val(13).change();
@@ -363,7 +363,7 @@ var Sim = class {
             $('#seg-table tr').removeClass('selected-seg');
             $('.seg').removeClass('selected-seg');
         }
-
+            
         try {
             this.drawTranslatedAddress(sno, offset);
         } catch (e) {
@@ -385,14 +385,13 @@ var Sim = class {
         //Draw the "translated" address within the PAS
         let base = parseInt(this.segments.items[parseInt(sno, 2)].base)
         let size = parseInt(this.segments.items[parseInt(sno, 2)].size)
+        let vMemSize = parseInt(Math.pow(2, parseInt(this.vLength) - 2));
 
         //The physical address given the virtual address
         //When negative, using base - offset instead of base - size + offset causes the virtual address to be mapped negatively to negatively growing segments.
-        let pAddress = this.segments.items[parseInt(sno, 2)].direction === 'Positive' ? base + offset : base - size + offset;
-
+        let pAddress = this.segments.items[parseInt(sno, 2)].direction === 'Positive' ? base + offset : (base - size + offset) - (vMemSize - size);
         //Throw an error an exit function if the translated address is outside the bounds of a segment's physical bounds
-        //Negative condiiton used to be pAdress < base - size for when the addresses were negatively mapped (instead of offset) onto negative segments
-        if (this.segments.items[parseInt(sno, 2)].direction === 'Positive' ? pAddress > base + size : pAddress > base )
+        if (this.segments.items[parseInt(sno, 2)].direction === 'Positive' ? pAddress > base + size : pAddress < base - size )
             throw 'pAddress out of bounds of a physical address';
 
         $('#translated-address').html(pAddress);
@@ -405,16 +404,22 @@ var Sim = class {
         `);
 
         //Now let's draw the virtual address within the VAS
-        let relativeVasRatio = offset / parseInt(Math.pow(2, parseInt(this.vLength) - 2));
+
+        //This cancerous monstrosity is shameful
+        let relativeVasPos = offset / (vMemSize * 4) * $('#vas-area').width() + parseInt(sno, 2) * ($('#vas-area').width() * .25);
+
+        //Old code that kinda worked but mostly doesn't, replaced by said cancerous monstrosity.
+        /* let relativeVasRatio = offset / vMemSize;
         let relativeVasPos = $(`#vas-area`).width() * .25 * relativeVasRatio + parseFloat($(`#vas-seg_${ parseInt(sno, 2) }`).css('left'));
-        
         if (this.segments.items[parseInt(sno, 2)].direction === 'Negative') {
             let diff = relativeVasPos - parseFloat($(`#vas-seg_${ parseInt(sno, 2) }`).css('left'));
+            //let diff = relativeVasPos - parseFloat($(`#vas-seg_${ parseInt(sno, 2) }`).css('left'));
             //let end = parseFloat($(`#vas-seg_${ parseInt(sno, 2) }`).css('left')) + $(`#vas-seg_${ parseInt(sno, 2) }`).width();
 
             //relativeVasPos = end - diff; For when the segment was negatively mapped onto the segment
             relativeVasPos = parseFloat($(`#vas-seg_${ parseInt(sno, 2) }`).css('left')) + diff;
-        }
+            console.log(relativeVasPos)
+        } */
         
         $('#vas-area').append(`
         <div class="translate-seg seg" id="vas-translate_${ parseInt(sno, 2) }" style="left: ${ relativeVasPos }; width: 5px; background-color: lightblue; z-index: 7;">
