@@ -45,7 +45,6 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    cursor: pointer;
     top: 0;
     border: 1px solid white;
     transition: .3s;
