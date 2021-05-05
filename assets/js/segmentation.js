@@ -236,15 +236,19 @@ var Sim = class {
         for (let i = 0; i <= 8; i++) {
             let realPos = (i * .125) * size;
             let relativePos = (realPos / size) * length;
+            let rawRelativePos = relativePos
 
             let style = `left: ${ relativePos - 6 };`;
             if (i === 0)
-                style = `left: ${ relativePos + 10 };`;
+                style = `left: ${ relativePos + 3 };`;
             else if (i === 8)
-                style = `right: ${ 30 };`;
+                style = `right: ${ 5 };`;
+            else
+                style = `left : ${ relativePos - ((relativePos.toString().length - 1) * 4.5) }`
 
             $('#pas-area').append(`
                 <div class="sim-axis" style="${ style };">${ Math.round(realPos) }</div>
+                <div class="axis-separator" style="left: ${ i !== 8 ? rawRelativePos : rawRelativePos - 3 }"></div>
             `);
         }
     }
@@ -266,15 +270,17 @@ var Sim = class {
         for (let i = 0; i <= 4; i++) {
             let realPos = (i * .25) * vasSize;
             let relativePos = (realPos / vasSize) * length;
-
+            let rawRelativePos = relativePos;
             if (i === 0)
                 relativePos += 5;
             else if (i === 4)
-                relativePos -= 50;
+                relativePos -= 30;
+            else
+                relativePos -= 8.5;
 
             $('#vas-area').append(`
                 <div class="sim-axis" style="left: ${ relativePos };">${ binary(realPos, 2) }</div>
-                <!--<div class="axis-separator" style="left: ${ relativePos };"></div>-->
+                <div class="axis-separator" style="left: ${ i !== 4 ? rawRelativePos : rawRelativePos - 3 };"></div>
             `);
         }
     }
