@@ -48,6 +48,7 @@
     cursor: pointer;
     top: 0;
     border: 1px solid white;
+    transition: .3s;
 }
 
 .seg-identifier {
@@ -81,6 +82,11 @@
     z-index: 10;
 }
 
+.selected-seg {
+    filter: saturate(0.4) brightness(1.5);
+    z-index: 5;
+}
+
 /*
     Segmentation Table CSS
 */
@@ -96,14 +102,16 @@
     text-align: center;
 }
 
-#seg-table td {
-    vertical-align: middle;
+#seg-table th {
+    border-bottom-color: inherit;
 }
 
-.selected-seg {
-    filter: brightness(1.5);
-    transition: .2s;
-    z-index: 5;
+#seg-table tr {
+    transition: .3s;
+}
+
+#seg-table td {
+    vertical-align: middle;
 }
 
 .hide-seg-table-alert {

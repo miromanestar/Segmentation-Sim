@@ -353,7 +353,7 @@ var Sim = class {
         }
 
         if (num === '') {
-            $('#translated-address').html('N/A');
+            $('#translated-address').html('<span class="text-warning">N/A</span>');
             $('#seg-table tr').removeClass('selected-seg');
             $('.seg').removeClass('selected-seg');
             return;
@@ -373,7 +373,7 @@ var Sim = class {
         try {
             this.drawTranslatedAddress(sno, offset);
         } catch (e) {
-            $('#translated-address').html('Segfault');
+            $('#translated-address').html('<span class="text-danger">Segfault</span>');
             $('#seg-table tr').removeClass('selected-seg');
             $('.seg').removeClass('selected-seg');
             return;
@@ -400,7 +400,7 @@ var Sim = class {
         if (this.segments.items[parseInt(sno, 2)].direction === 'Positive' ? pAddress > base + size : pAddress < base - size )
             throw 'pAddress out of bounds of a physical address';
 
-        $('#translated-address').html(pAddress);
+        $('#translated-address').html(`<span class="text-info">${ pAddress }</span>`);
 
         let relativePasPos = pAddress / Math.pow(2, parseInt(this.pLength)) * $('#pas-area').width();
         $('#pas-area').append(`
