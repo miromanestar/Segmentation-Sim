@@ -2,7 +2,7 @@ $(document).ready(function() {
     sim = new Sim();
     sim.createSegment('Code', 8_000, 2_048, 'Positive', 0);
     sim.createSegment('Heap', 10_000, 2_048, 'Positive', 1);
-    sim.createSegment('Stack', 16_000, 2_048, 'Negative', 3);
+    sim.createSegment('Stack', 16_000, 2_048, 'Negative', 2);
 
     $('#pas-input').val(16).change();
     $('#vas-input').val(13).change();
@@ -173,9 +173,10 @@ var Sim = class {
         let relativePos = (realPos / vasSize) * length;
         
         //Calculates the space between each "segment" grid in the VAS and figures the relative size of each virtual segment
+        let nextRelativePos;
         let calcRelSize = () => {
             let nextPos = ( (s.number + 1) * .25) * vasSize;
-            let nextRelativePos = (nextPos / vasSize) * length;
+            nextRelativePos = (nextPos / vasSize) * length;
 
             let actualWidth = nextRelativePos - relativePos;
             let widthRatio = parseInt(s.size) / Math.pow(2, parseInt(this.vLength) - 2);
@@ -185,7 +186,7 @@ var Sim = class {
         let relativeSize = calcRelSize();
 
         let style = `
-            left: ${ s.direction !== 'Negative' ? relativePos : relativePos - relativeSize }; 
+            left: ${ s.direction !== 'Negative' ? relativePos : nextRelativePos - relativeSize }; 
             width: ${ relativeSize };
             background-color: ${ s.direction !== 'Negative' ? 'blue' : 'red' };
         `;
