@@ -9,7 +9,7 @@ $(document).ready(function() {
     sim = new Sim();
     sim.createSegment('Code', 8_000, 2_048, 'Positive', 0);
     sim.createSegment('Heap', 10_050, 2_048, 'Positive', 1);
-    sim.createSegment('Stack', 16_000, 2_048, 'Negative', 2);
+    sim.createSegment('Stack', 16_000, 1500, 'Negative', 2);
 
     $('#pas-input').val(16).change();
     $('#vas-input').val(13).change();
@@ -387,12 +387,13 @@ var Sim = class {
         let size = parseInt(this.segments.items[parseInt(sno, 2)].size)
 
         //The physical address given the virtual address
-        let pAddress = this.segments.items[parseInt(sno, 2)].direction === 'Positive' ? base + offset : base - offset;
+        //When negative, using base - offset instead of base - size + offset causes the virtual address to be mapped negatively to negatively growing segments.
+        let pAddress = this.segments.items[parseInt(sno, 2)].direction === 'Positive' ? base + offset : base - size + offset;
 
         //Throw an error an exit function if the translated address is outside the bounds of a segment's physical bounds
-        if (this.segments.items[parseInt(sno, 2)].direction === 'Positive' ? pAddress > base + size : pAddress < base - size) {
+        //Negative condiiton used to be pAdress < base - size for when the addresses were negatively mapped (instead of offset) onto negative segments
+        if (this.segments.items[parseInt(sno, 2)].direction === 'Positive' ? pAddress > base + size : pAddress > base )
             throw 'pAddress out of bounds of a physical address';
-        }
 
         $('#translated-address').html(pAddress);
 
@@ -409,9 +410,10 @@ var Sim = class {
         
         if (this.segments.items[parseInt(sno, 2)].direction === 'Negative') {
             let diff = relativeVasPos - parseFloat($(`#vas-seg_${ parseInt(sno, 2) }`).css('left'));
-            let end = parseFloat($(`#vas-seg_${ parseInt(sno, 2) }`).css('left')) + $(`#vas-seg_${ parseInt(sno, 2) }`).width();
+            //let end = parseFloat($(`#vas-seg_${ parseInt(sno, 2) }`).css('left')) + $(`#vas-seg_${ parseInt(sno, 2) }`).width();
 
-            relativeVasPos = end - diff;
+            //relativeVasPos = end - diff; For when the segment was negatively mapped onto the segment
+            relativeVasPos = parseFloat($(`#vas-seg_${ parseInt(sno, 2) }`).css('left')) + diff;
         }
         
         $('#vas-area').append(`
