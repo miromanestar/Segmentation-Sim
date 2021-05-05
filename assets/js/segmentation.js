@@ -265,6 +265,12 @@ var Sim = class {
 
     //Sets the length of the virtual address in bits
     setPas(num) {
+        if (parseInt(num) < parseInt(this.vLength) + 1) {
+            alert('Your physical address length must be greater than your virtual address length');
+            $('#pas-input').val(this.pLength);
+            return;
+        }
+
         this.pLength = num;
         this.pAxis();
         this.drawSegments();
