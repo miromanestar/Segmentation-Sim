@@ -1,5 +1,11 @@
 $(document).ready(function() {
     sim = new Sim();
+    sim.createSegment('Code', 8_000, 2_048, 'Positive', 0);
+    sim.createSegment('Heap', 10_000, 2_048, 'Positive', 1);
+    sim.createSegment('Stack', 16_000, 2_048, 'Negative', 3);
+
+    $('#pas-input').val(16).change();
+    $('#vas-input').val(13).change();
 });
 
 var sim = class {};
@@ -11,13 +17,6 @@ var Sim = class {
             nextSegmentNo: 0, //Does nothing for now
             items: {} 
         }
-
-        $('.vas-null').remove();
-        //Create the 3 default segments
-        this.createSegment('Code', 8_000, 2_000, 'Positive', 0);
-        this.createSegment('Heap', 10_000, 2_000, 'Positive', 1);
-        this.createSegment('Stack', 16_000, 2_000, 'Negative', 3);
-
 
         window.addEventListener('resize', ev => this.handleResize());
     }
@@ -332,6 +331,8 @@ var Sim = class {
 
         if (num === '') {
             $('#translated-address').html('N/A');
+            $('#seg-table tr').removeClass('selected-seg');
+            $('.seg').removeClass('selected-seg');
             return;
         }
 
@@ -341,7 +342,6 @@ var Sim = class {
         let sno = bi.substr(0, 2); //Segment number
         let offset = parseInt(bi.substr(2), 2); //The actual virtual address bit
 
-        console.log(sno, this.lastSelectedSegment);
         if (sno !== this.lastSelectedSegment) {
             $('#seg-table tr').removeClass('selected-seg');
             $('.seg').removeClass('selected-seg');
@@ -351,14 +351,15 @@ var Sim = class {
             this.drawTranslatedAddress(sno, offset);
         } catch (e) {
             $('#translated-address').html('Segfault');
+            $('#seg-table tr').removeClass('selected-seg');
+            $('.seg').removeClass('selected-seg');
             return;
         }
 
-        if (sno !== this.lastSelectedSegment) {
-            $(`#seg-table_${ parseInt(sno, 2) }`).addClass('selected-seg');
-            $(`#vas-seg_${ parseInt(sno, 2) }`).addClass('selected-seg');
-            $(`#pas-seg_${ parseInt(sno, 2) }`).addClass('selected-seg');
-        }
+        $(`#seg-table_${ parseInt(sno, 2) }`).addClass('selected-seg');
+
+        $(`#vas-seg_${ parseInt(sno, 2) }`).addClass('selected-seg');
+        $(`#pas-seg_${ parseInt(sno, 2) }`).addClass('selected-seg');
 
         this.lastSelectedSegment = sno;
     }
@@ -380,24 +381,27 @@ var Sim = class {
 
         let relativePasPos = pAddress / Math.pow(2, parseInt(this.pLength)) * $('#pas-area').width();
         $('#pas-area').append(`
-        <div class="translate-seg seg" id="pas-translate_${ parseInt(sno, 2) }" style="left: ${ relativePasPos }; width: 5px; background-color: lightblue; z-index: 4;">
+        <div class="translate-seg seg" id="pas-translate_${ parseInt(sno, 2) }" style="left: ${ relativePasPos }; width: 5px; background-color: lightblue; z-index: 7;">
             <!-- <div class="seg-identifier">${ binary(sno, 2) }</div> -->
         </div>
         `);
 
         //Now let's draw the virtual address within the VAS
         let relativeVasRatio = offset / parseInt(Math.pow(2, parseInt(this.vLength) - 2));
-        let relativeVasPos = $(`#vas-seg_${ parseInt(sno, 2) }`).width() * relativeVasRatio + parseFloat($(`#vas-seg_${ parseInt(sno, 2) }`).css('left'));
+        let relativeVasPos = $(`#vas-area`).width() * .25 * relativeVasRatio + parseFloat($(`#vas-seg_${ parseInt(sno, 2) }`).css('left'));
         
         if (this.segments.items[parseInt(sno, 2)].direction === 'Negative') {
             let diff = relativeVasPos - parseFloat($(`#vas-seg_${ parseInt(sno, 2) }`).css('left'));
             let end = parseFloat($(`#vas-seg_${ parseInt(sno, 2) }`).css('left')) + $(`#vas-seg_${ parseInt(sno, 2) }`).width();
 
             relativeVasPos = end - diff - 6; //Extra 5 accounts for width of the element showing position 
+        } else {
+            //If positive
+            //relativeVasPos += 6;
         }
         
         $('#vas-area').append(`
-        <div class="translate-seg seg" id="vas-translate_${ parseInt(sno, 2) }" style="left: ${ relativeVasPos }; width: 5px; background-color: lightblue; z-index: 4;">
+        <div class="translate-seg seg" id="vas-translate_${ parseInt(sno, 2) }" style="left: ${ relativeVasPos }; width: 5px; background-color: lightblue; z-index: 7;">
             <!-- <div class="seg-identifier">${ binary(sno, 2) }</div> -->
         </div>
         `);

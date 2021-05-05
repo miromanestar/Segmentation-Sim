@@ -103,6 +103,7 @@
 .selected-seg {
     filter: brightness(1.5);
     transition: .2s;
+    z-index: 5;
 }
 
 .hide-seg-table-alert {
