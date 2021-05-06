@@ -396,39 +396,31 @@ var Sim = class {
         //The physical address given the virtual address
         //When negative, using base - offset instead of base - size + offset causes the virtual address to be mapped negatively to negatively growing segments.
         let pAddress = this.segments.items[parseInt(sno, 2)].direction === 'Positive' ? base + offset : (base - size + offset) - (vMemSize - size);
+        let relativePasPos = pAddress / Math.pow(2, parseInt(this.pLength)) * $('#pas-area').width();
+        let relativeVasPos = offset / (vMemSize * 4) * $('#vas-area').width() + parseInt(sno, 2) * ($('#vas-area').width() * .25);
+
         //Throw an error an exit function if the translated address is outside the bounds of a segment's physical bounds
-        if (this.segments.items[parseInt(sno, 2)].direction === 'Positive' ? pAddress > base + size : pAddress < base - size )
+        if (this.segments.items[parseInt(sno, 2)].direction === 'Positive' ? pAddress > base + size : pAddress < base - size ) {
+            //As per ProfO's request, draw the translated address with a different color if segfault in the VAS
+            $('#vas-area').append(`
+            <div class="translate-seg segfault seg" id="vas-translate_${ parseInt(sno, 2) }" style="left: ${ relativeVasPos };">
+                <!-- <div class="seg-identifier">${ binary(sno, 2) }</div> -->
+            </div>
+            `);
+
             throw 'pAddress out of bounds of a physical address';
+        }
 
         $('#translated-address').html(`<span class="text-info">${ pAddress }</span>`);
 
-        let relativePasPos = pAddress / Math.pow(2, parseInt(this.pLength)) * $('#pas-area').width();
         $('#pas-area').append(`
-        <div class="translate-seg seg" id="pas-translate_${ parseInt(sno, 2) }" style="left: ${ relativePasPos }; width: 5px; background-color: lightblue; z-index: 7;">
+        <div class="translate-seg seg" id="pas-translate_${ parseInt(sno, 2) }" style="left: ${ relativePasPos };">
             <!-- <div class="seg-identifier">${ binary(sno, 2) }</div> -->
         </div>
         `);
-
-        //Now let's draw the virtual address within the VAS
-
-        //This cancerous monstrosity is shameful
-        let relativeVasPos = offset / (vMemSize * 4) * $('#vas-area').width() + parseInt(sno, 2) * ($('#vas-area').width() * .25);
-
-        //Old code that kinda worked but mostly doesn't, replaced by said cancerous monstrosity.
-        /* let relativeVasRatio = offset / vMemSize;
-        let relativeVasPos = $(`#vas-area`).width() * .25 * relativeVasRatio + parseFloat($(`#vas-seg_${ parseInt(sno, 2) }`).css('left'));
-        if (this.segments.items[parseInt(sno, 2)].direction === 'Negative') {
-            let diff = relativeVasPos - parseFloat($(`#vas-seg_${ parseInt(sno, 2) }`).css('left'));
-            //let diff = relativeVasPos - parseFloat($(`#vas-seg_${ parseInt(sno, 2) }`).css('left'));
-            //let end = parseFloat($(`#vas-seg_${ parseInt(sno, 2) }`).css('left')) + $(`#vas-seg_${ parseInt(sno, 2) }`).width();
-
-            //relativeVasPos = end - diff; For when the segment was negatively mapped onto the segment
-            relativeVasPos = parseFloat($(`#vas-seg_${ parseInt(sno, 2) }`).css('left')) + diff;
-            console.log(relativeVasPos)
-        } */
         
         $('#vas-area').append(`
-        <div class="translate-seg seg" id="vas-translate_${ parseInt(sno, 2) }" style="left: ${ relativeVasPos }; width: 5px; background-color: lightblue; z-index: 7;">
+        <div class="translate-seg seg" id="vas-translate_${ parseInt(sno, 2) }" style="left: ${ relativeVasPos };">
             <!-- <div class="seg-identifier">${ binary(sno, 2) }</div> -->
         </div>
         `);
