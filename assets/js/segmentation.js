@@ -7,12 +7,12 @@
 
 $(document).ready(function() {
     sim = new Sim();
-    sim.createSegment('Code', 8_000, 2_048, 'Positive', 0);
-    sim.createSegment('Heap', 10_050, 2_048, 'Positive', 1);
-    sim.createSegment('Stack', 16_000, 2_048, 'Negative', 2);
+    sim.createSegment('Code', 1024, 250, 'Positive', 0);
+    sim.createSegment('Heap', 1274, 200, 'Positive', 1);
+    sim.createSegment('Stack', 1536, 62, 'Negative', 2);
 
-    $('#pas-input').val(16).change();
-    $('#vas-input').val(13).change();
+    $('#pas-input').val(12).change();
+    $('#vas-input').val(10).change();
 });
 
 var sim = class {};
@@ -271,15 +271,17 @@ var Sim = class {
             let realPos = (i * .25) * vasSize;
             let relativePos = (realPos / vasSize) * length;
             let rawRelativePos = relativePos;
+            
+            let style = `left: ${ relativePos - 6 };`;
             if (i === 0)
-                relativePos += 5;
+                style = `left: ${ relativePos + 3 };`;
             else if (i === 4)
-                relativePos -= 30;
+                style = `right: ${ 5 };`;
             else
-                relativePos -= 8.5;
+                style = `left : ${ relativePos - ((relativePos.toString().length - 1) * 4.5) }`
 
             $('#vas-area').append(`
-                <div class="sim-axis" style="left: ${ relativePos };">${ binary(realPos, 2) }</div>
+                <div class="sim-axis" style="${ style }">${ i * Math.pow(2, parseInt(this.vLength - 2)) }</div>
                 <div class="axis-separator" style="left: ${ i !== 4 ? rawRelativePos : rawRelativePos - 3 };"></div>
             `);
         }
@@ -369,9 +371,9 @@ var Sim = class {
             $('#seg-table tr').removeClass('selected-seg');
             $('.seg').removeClass('selected-seg');
         }
-            
+
         try {
-            this.drawTranslatedAddress(sno, offset);
+            this.drawTranslatedAddress(sno, offset, num);
         } catch (e) {
             $('#translated-address').html('<span class="text-danger">Segfault</span>');
             $('#seg-table tr').removeClass('selected-seg');
@@ -387,20 +389,25 @@ var Sim = class {
         this.lastSelectedSegment = sno;
     }
 
-    drawTranslatedAddress(sno, offset) {
+    drawTranslatedAddress(sno, offset, fullVAddress) {
         //Draw the "translated" address within the PAS
-        let base = parseInt(this.segments.items[parseInt(sno, 2)].base)
-        let size = parseInt(this.segments.items[parseInt(sno, 2)].size)
+        let base, size, dir;
+        try {
+            base = parseInt(this.segments.items[parseInt(sno, 2)].base)
+            size = parseInt(this.segments.items[parseInt(sno, 2)].size)
+            dir = this.segments.items[parseInt(sno, 2)].direction;
+        } catch(e) {};
         let vMemSize = parseInt(Math.pow(2, parseInt(this.vLength) - 2));
 
         //The physical address given the virtual address
         //When negative, using base - offset instead of base - size + offset causes the virtual address to be mapped negatively to negatively growing segments.
-        let pAddress = this.segments.items[parseInt(sno, 2)].direction === 'Positive' ? base + offset : (base - size + offset) - (vMemSize - size);
+        let pAddress = dir === 'Positive' ? base + offset : (base - size + offset) - (vMemSize - size);
         let relativePasPos = pAddress / Math.pow(2, parseInt(this.pLength)) * $('#pas-area').width();
-        let relativeVasPos = offset / (vMemSize * 4) * $('#vas-area').width() + parseInt(sno, 2) * ($('#vas-area').width() * .25);
+        //let relativeVasPos = offset / (vMemSize * 4) * $('#vas-area').width() + parseInt(sno, 2) * ($('#vas-area').width() * .25);
+        let relativeVasPos = fullVAddress / (vMemSize * 4) * $('#vas-area').width();
 
         //Throw an error an exit function if the translated address is outside the bounds of a segment's physical bounds
-        if (this.segments.items[parseInt(sno, 2)].direction === 'Positive' ? pAddress > base + size : pAddress < base - size ) {
+        if (dir === 'Positive' ? pAddress > base + size : pAddress < base - size || !base) {
             //As per ProfO's request, draw the translated address with a different color if segfault in the VAS
             $('#vas-area').append(`
             <div class="translate-seg segfault seg" id="vas-translate_${ parseInt(sno, 2) }" style="left: ${ relativeVasPos };">
@@ -476,6 +483,22 @@ var Sim = class {
     handleResize() {
         this.drawAxis();
         this.drawSegments();
+    }
+
+    reset() {
+        $('#seg-table').empty();
+        this.segments = { 
+            length: 0, 
+            nextSegmentNo: 0, //Does nothing for now
+            items: {} 
+        };
+
+        sim.createSegment('Code', 1024, 250, 'Positive', 0);
+        sim.createSegment('Heap', 1274, 200, 'Positive', 1);
+        sim.createSegment('Stack', 1536, 62, 'Negative', 2);
+
+        $('#pas-input').val(12).change();
+        $('#vas-input').val(10).change();
     }
 };
 
