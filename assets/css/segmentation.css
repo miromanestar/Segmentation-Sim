@@ -54,6 +54,7 @@
     width: 5px;
     background-color: lightblue;
     z-index: 7;
+    transition: .1s;
 }
 
 .segfault {

@@ -344,7 +344,7 @@ var Sim = class {
 
     //Translates a virtual address into a physical address and highlights the appropriate segments to show intersections
     translateAddress(num, isSilent) {
-        $('.translate-seg').remove();
+        //$('.translate-seg').remove();
         if (!this.vLength) {
             if (!isSilent) {
                 alert('You must enter a virtual address length');
@@ -358,6 +358,7 @@ var Sim = class {
             $('#translated-address').html('<span class="text-warning">N/A</span>');
             $('#seg-table tr').removeClass('selected-seg');
             $('.seg').removeClass('selected-seg');
+            $('.translate-seg').remove();
             return;
         }
 
@@ -409,28 +410,41 @@ var Sim = class {
         //Throw an error an exit function if the translated address is outside the bounds of a segment's physical bounds
         if (dir === 'Positive' ? pAddress > base + size : pAddress < base - size || !base) {
             //As per ProfO's request, draw the translated address with a different color if segfault in the VAS
-            $('#vas-area').append(`
-            <div class="translate-seg segfault seg" id="vas-translate_${ parseInt(sno, 2) }" style="left: ${ relativeVasPos };">
-                <!-- <div class="seg-identifier">${ binary(sno, 2) }</div> -->
-            </div>
-            `);
+            if ($('#vas-area .translate-seg').length) {
+                $('#vas-area .translate-seg').css('left', relativeVasPos).addClass('segfault');
+            } else {
+                $('#vas-area').append(`
+                <div class="translate-seg segfault seg" id="vas-translate_${ parseInt(sno, 2) }" style="left: ${ relativeVasPos };">
+                    <!-- <div class="seg-identifier">${ binary(sno, 2) }</div> -->
+                </div>
+                `);
+            }
+            $('#pas-area .translate-seg').remove();
 
             throw 'pAddress out of bounds of a physical address';
         }
 
         $('#translated-address').html(`<span class="text-info">${ pAddress }</span>`);
 
-        $('#pas-area').append(`
-        <div class="translate-seg seg" id="pas-translate_${ parseInt(sno, 2) }" style="left: ${ relativePasPos };">
-            <!-- <div class="seg-identifier">${ binary(sno, 2) }</div> -->
-        </div>
-        `);
-        
-        $('#vas-area').append(`
-        <div class="translate-seg seg" id="vas-translate_${ parseInt(sno, 2) }" style="left: ${ relativeVasPos };">
-            <!-- <div class="seg-identifier">${ binary(sno, 2) }</div> -->
-        </div>
-        `);
+        if ($('#pas-area .translate-seg').length) {
+            $('#pas-area .translate-seg').css('left', relativePasPos);
+        } else {
+            $('#pas-area').append(`
+            <div class="translate-seg seg" id="pas-translate_${ parseInt(sno, 2) }" style="left: ${ relativePasPos };">
+                <!-- <div class="seg-identifier">${ binary(sno, 2) }</div> -->
+            </div>
+            `);
+        }
+
+        if ($('#vas-area .translate-seg').length) {
+            $('#vas-area .translate-seg').css('left', relativeVasPos).removeClass('segfault');
+        } else {
+            $('#vas-area').append(`
+            <div class="translate-seg seg" id="vas-translate_${ parseInt(sno, 2) }" style="left: ${ relativeVasPos };">
+                <!-- <div class="seg-identifier">${ binary(sno, 2) }</div> -->
+            </div>
+            `);
+        }
     }
 
     //Checks bounds within the PAS
