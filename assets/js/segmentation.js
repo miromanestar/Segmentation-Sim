@@ -66,8 +66,8 @@ var Sim = class {
         <tr id="seg-table_${ number }">
             <td>${ name }</td>
             <td>${ binary(number, 2) }</td>
-            <td><input id="base-input_${ number }" value="${ base }" type="number" min="0" class="minimal-input" onchange="sim.changeBase(${ number }, $(this).val());" placeholder="Base" style="width: 150px;" /></td>
-            <td><input id="size-input_${ number }" value="${ size }" type="number" min="0" class="minimal-input" onchange="sim.changeSize(${ number }, $(this).val());" placeholder="Size" style="width: 150px;" /></td>
+            <td><input id="base-input_${ number }" value="${ base }" type="number" min="0" class="minimal-input" onchange="sim.changeBase(${ number }, $(this).val());" placeholder="Base" /></td>
+            <td><input id="size-input_${ number }" value="${ size }" type="number" min="0" class="minimal-input" onchange="sim.changeSize(${ number }, $(this).val());" placeholder="Size" /></td>
             <td>
                 <select class="select-css" name="segment-direction" onchange="sim.changeDir(${ number }, $(this).val());" id="dir-input_${ number }">
                     <option>Positive</option>
@@ -96,7 +96,7 @@ var Sim = class {
             let check = this.checkBounds(this.segments.items[sno]);
 
             if (check.result) {
-                $(`#pas-seg_${ sno }`).remove();
+                //$(`#pas-seg_${ sno }`).remove();
                 this.drawSegments();
             } else {
                 alert(check.msg);
@@ -132,7 +132,7 @@ var Sim = class {
             let check = this.checkBounds(this.segments.items[sno]);
 
             if (check.result) {
-                $(`#pas-seg_${ sno }, #vas-seg_${ sno }`).remove();
+                //$(`#pas-seg_${ sno }, #vas-seg_${ sno }`).remove();
                 this.drawSegments();
             } else {
                 alert(check.msg);
@@ -155,8 +155,10 @@ var Sim = class {
     }
 
     pSegment(s) {
-        if (!this.pLength)
+        if (!this.pLength) {
+            $(`#pas-seg_${ s.number }`).remove();
             return;
+        }
         
         let length = $('#pas-area').width();
 
@@ -184,8 +186,10 @@ var Sim = class {
 
     //Draws segments in the virtual address space
     vSegment(s) {
-        if (!this.vLength)
+        if (!this.vLength) {
+            $(`#vas-seg_${ s.number }`).remove();
             return;
+        }
 
         let length = $('#vas-area').width();
 
@@ -229,12 +233,11 @@ var Sim = class {
     }
 
     pAxis() {
-        $('#pas-area .sim-axis, #pas-area .axis-separator').remove();
-
         if (this.pLength) {
             $('#pas-area .mem-null').hide();
         } else {
             $('#pas-area .mem-null').show();
+            $('#pas-area .sim-axis, #pas-area .axis-separator').remove();
             return;
         }
 
@@ -255,21 +258,31 @@ var Sim = class {
             else
                 style = `left : ${ relativePos - ((relativePos.toString().length - 1) * 4.5) }`
 
-            $('#pas-area').append(`
-                <div class="sim-axis" style="${ style };">${ Math.round(realPos) }</div>
-                <div class="axis-separator" style="left: ${ i !== 8 ? rawRelativePos : rawRelativePos - 3 }"></div>
-            `);
+            if ($(`#pas-axis_${ i }`).length) {
+                $(`#pas-axis_${ i }`).attr('style', style).html(Math.round(realPos));
+            } else {
+                $('#pas-area').append(`
+                <div class="sim-axis" id="pas-axis_${ i }" style="${ style };">${ Math.round(realPos) }</div>
+                `);
+            }
+
+            if( $(`#pas-separator_${ i }`).length) {
+                $(`#pas-separator_${ i }`).css('left', i !== 8 ? rawRelativePos : rawRelativePos - 3);
+            } else {
+                $('#pas-area').append(`
+                <div class="axis-separator" id="pas-separator_${ i }" style="left: ${ i !== 8 ? rawRelativePos : rawRelativePos - 3 }"></div>
+                `);
+            }
         }
     }
 
     //Draw the virtual address space axis
     vAxis() {
-        $('#vas-area .sim-axis, #vas-area .axis-separator').remove();
-
         if (this.vLength) {
             $('#vas-area .mem-null').hide();
         } else {
             $('#vas-area .mem-null').show();
+            $('#vas-area .sim-axis, #vas-area .axis-separator').remove();
             return;
         }
 
@@ -289,10 +302,21 @@ var Sim = class {
             else
                 style = `left : ${ relativePos - ((relativePos.toString().length - 1) * 4.5) }`
 
-            $('#vas-area').append(`
-                <div class="sim-axis" style="${ style }">${ i * Math.pow(2, parseInt(this.vLength - 2)) }</div>
-                <div class="axis-separator" style="left: ${ i !== 4 ? rawRelativePos : rawRelativePos - 3 };"></div>
-            `);
+            if ($(`#vas-axis_${ i }`).length) {
+                $(`#vas-axis_${ i }`).attr('style', style).html( i * Math.pow(2, parseInt(this.vLength - 2)) );
+            } else {
+                $('#vas-area').append(`
+                <div class="sim-axis" id="vas-axis_${ i }" style="${ style }">${ i * Math.pow(2, parseInt(this.vLength - 2)) }</div>
+                `);
+            }
+
+            if( $(`#vas-separator_${ i }`).length) {
+                $(`#vas-separator_${ i }`).css('left', i !== 4 ? rawRelativePos : rawRelativePos - 3);
+            } else {
+                $('#vas-area').append(`
+                <div class="axis-separator" id="vas-separator_${ i }" style="left: ${ i !== 4 ? rawRelativePos : rawRelativePos - 3 };"></div>
+                `);
+            }
         }
     }
 

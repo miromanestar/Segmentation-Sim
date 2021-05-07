@@ -5,8 +5,11 @@
 #sim-config {
     display: flex;
     justify-content: space-between;
-    height: 50px;
     margin-bottom: 20px;
+}
+
+#sim-config span {
+    display: inline-block;
 }
 
 #add-segment {
@@ -82,6 +85,7 @@
     margin-top: 30px;
     bottom: 0;
     z-index: 3;
+    transition: .1s;
 }
 
 .axis-separator {
@@ -91,6 +95,7 @@
     width: 2px;
     background-color: rgba(255, 255, 255, .3);
     z-index: 10;
+    transition: .1s;
 }
 
 .selected-seg {
@@ -109,8 +114,16 @@
 }
 
 #seg-table {
-    width: 100%;
     text-align: center;
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
+}
+
+@media only screen and (min-width: 1000px) {
+    #seg-table {
+        width: 50%;
+    }
 }
 
 #seg-table th {
