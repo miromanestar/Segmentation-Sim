@@ -114,7 +114,7 @@ var Sim = class {
             let check = this.checkBounds(this.segments.items[sno]);
 
             if (check.result) {
-                $(`#pas-seg_${ sno }`).remove();
+                //$(`#pas-seg_${ sno }`).remove();
                 this.drawSegments();
             } else {
                 alert(check.msg);
@@ -143,7 +143,7 @@ var Sim = class {
     }
 
     drawSegments() {
-        $('.memory-area .seg').remove();
+        //$('.memory-area .seg').remove();
         for (let s in this.segments.items)
             this.drawSegment(this.segments.items[s]);
         this.translateAddress($('#translation-input').val(), true); //The true silences alerts from the function
@@ -170,11 +170,16 @@ var Sim = class {
             background-color: ${ s.direction !== 'Negative' ? 'blue' : 'red' };
         `;
 
-        $('#pas-area').append(`
+        if ($(`#pas-seg_${ s.number }`).length) {
+            $(`#pas-seg_${ s.number }`).attr('style', style);
+            console.log()
+        } else {
+            $('#pas-area').append(`
             <div class="seg" id="pas-seg_${ s.number }" style="${ style }">
                 <div class="seg-identifier">${ binary(s.number, 2) }</div>
             </div>
-        `);
+            `);
+        }
     }
 
     //Draws segments in the virtual address space
@@ -207,11 +212,15 @@ var Sim = class {
             background-color: ${ s.direction !== 'Negative' ? 'blue' : 'red' };
         `;
 
-        $('#vas-area').append(`
+        if ($(`#vas-seg_${ s.number }`).length) {
+            $(`#vas-seg_${ s.number }`).attr('style', style);
+        } else {
+            $('#vas-area').append(`
             <div class="seg" id="vas-seg_${ s.number }" style="${ style }">
                 <div class="seg-identifier">${ binary(s.number, 2) }</div>
             </div>
-        `);
+            `);
+        }
     }
 
     drawAxis() {
