@@ -368,7 +368,7 @@ var Sim = class {
 
             if (seg.size > vSize) {
                 alert(`Segment ${ binary(seg.number, 2) } is larger than your virtual address allows.\n
-                VA Length: ${ parseInt(num) - 2 }: ${ vSize }\n
+                VA Length: ${ num } | Offset: ${ parseInt(num) - 2 }\n
                 VA Size: ${ vSize }\n
                 Segment Size: ${ seg.size }
                 `);
