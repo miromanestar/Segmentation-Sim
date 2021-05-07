@@ -174,7 +174,6 @@ var Sim = class {
 
         if ($(`#pas-seg_${ s.number }`).length) {
             $(`#pas-seg_${ s.number }`).attr('style', style);
-            console.log()
         } else {
             $('#pas-area').append(`
             <div class="seg" id="pas-seg_${ s.number }" style="${ style }">
@@ -182,6 +181,8 @@ var Sim = class {
             </div>
             `);
         }
+
+        fitty(`#pas-seg_${ s.number } .seg-identifier`, { maxSize: 45 });
     }
 
     //Draws segments in the virtual address space
@@ -225,6 +226,8 @@ var Sim = class {
             </div>
             `);
         }
+
+        fitty(`#vas-seg_${ s.number } .seg-identifier`, { maxSize: 45 });
     }
 
     drawAxis() {
