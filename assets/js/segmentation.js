@@ -520,7 +520,7 @@ var Sim = class {
             return {
                 result: false,
                 msg: `Segment ${ binary(s.number, 2) } is larger than your virtual address allows.\n
-                VA Length: ${ parseInt(this.vLength) - 2 }\n
+                VA Length: ${ num } | Offset: ${ parseInt(num) - 2 }\n
                 VA Size: ${ Math.pow(2, parseInt(this.vLength) - 2) }\n
                 Segment Size: ${ s.size }
                 `
