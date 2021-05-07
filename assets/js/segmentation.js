@@ -182,7 +182,9 @@ var Sim = class {
             `);
         }
 
-        fitty(`#pas-seg_${ s.number } .seg-identifier`, { maxSize: 45 });
+        setTimeout(function() {
+            fitty(`#pas-seg_${ s.number } .seg-identifier`, { maxSize: 45 });
+        }, 120);
     }
 
     //Draws segments in the virtual address space
@@ -227,7 +229,9 @@ var Sim = class {
             `);
         }
 
-        fitty(`#vas-seg_${ s.number } .seg-identifier`, { maxSize: 45 });
+        setTimeout(function() {
+            fitty(`#vas-seg_${ s.number } .seg-identifier`, { maxSize: 45 });
+        }, 120);
     }
 
     drawAxis() {
