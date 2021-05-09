@@ -44,7 +44,7 @@ const origPageTitle = $('title').text();
 function loadContent(selection, state, changeState) {
     $('#page-content').fadeOut('fast', function () {
         $('#page-content').load(`${window.location.origin}/pages/${selection}`, function (response, status) {
-            //$('.navbar-collapse').collapse('hide');
+            $('.navbar-collapse').collapse('hide');
             if (status === 'success') {
 
                 if (enableBreadcrumbs)
