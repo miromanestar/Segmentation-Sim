@@ -96,7 +96,6 @@ var Sim = class {
             let check = this.checkBounds(this.segments.items[sno]);
 
             if (check.result) {
-                //$(`#pas-seg_${ sno }`).remove();
                 this.drawSegments();
             } else {
                 alert(check.msg);
@@ -114,7 +113,6 @@ var Sim = class {
             let check = this.checkBounds(this.segments.items[sno]);
 
             if (check.result) {
-                //$(`#pas-seg_${ sno }`).remove();
                 this.drawSegments();
             } else {
                 alert(check.msg);
@@ -132,7 +130,6 @@ var Sim = class {
             let check = this.checkBounds(this.segments.items[sno]);
 
             if (check.result) {
-                //$(`#pas-seg_${ sno }, #vas-seg_${ sno }`).remove();
                 this.drawSegments();
             } else {
                 alert(check.msg);
@@ -143,7 +140,6 @@ var Sim = class {
     }
 
     drawSegments() {
-        //$('.memory-area .seg').remove();
         for (let s in this.segments.items)
             this.drawSegment(this.segments.items[s]);
         this.translateAddress($('#translation-input').val(), true); //The true silences alerts from the function
@@ -384,7 +380,6 @@ var Sim = class {
 
     //Translates a virtual address into a physical address and highlights the appropriate segments to show intersections
     translateAddress(num, isSilent) {
-        //$('.translate-seg').remove();
         if (!this.vLength) {
             if (!isSilent) {
                 alert('You must enter a virtual address length');
@@ -431,6 +426,13 @@ var Sim = class {
     }
 
     drawTranslatedAddress(sno, offset, fullVAddress) {
+        let vMemSize = parseInt(Math.pow(2, parseInt(this.vLength)));
+
+        //Throw an error if the virtual address is outside the bounds of the VA space
+        if (fullVAddress < 0 || fullVAddress > vMemSize) {
+            throw new Error('The virtual address is outside the bounds of the virtual address space');
+        }
+
         //Draw the "translated" address within the PAS
         let base, size, dir;
         try {
@@ -438,13 +440,11 @@ var Sim = class {
             size = parseInt(this.segments.items[parseInt(sno, 2)].size)
             dir = this.segments.items[parseInt(sno, 2)].direction;
         } catch(e) {};
-        let vMemSize = parseInt(Math.pow(2, parseInt(this.vLength) - 2));
 
         //The physical address given the virtual address
         //When negative, using base - offset instead of base - size + offset causes the virtual address to be mapped negatively to negatively growing segments.
         let pAddress = dir === 'Positive' ? base + offset : (base - size + offset) - (vMemSize - size);
         let relativePasPos = pAddress / Math.pow(2, parseInt(this.pLength)) * $('#pas-area').width();
-        //let relativeVasPos = offset / (vMemSize * 4) * $('#vas-area').width() + parseInt(sno, 2) * ($('#vas-area').width() * .25);
         let relativeVasPos = fullVAddress / (vMemSize * 4) * $('#vas-area').width();
 
         //Throw an error an exit function if the translated address is outside the bounds of a segment's physical bounds
@@ -461,7 +461,7 @@ var Sim = class {
             }
             $('#pas-area .translate-seg').remove();
 
-            throw 'pAddress out of bounds of a physical address';
+            throw new Error('pAddress out of bounds of a physical address');
         }
 
         $('#translated-address').html(`<span class="text-info">${ pAddress }</span>`);
