@@ -7,12 +7,7 @@
 
 $(document).ready(function() {
     sim = new Sim();
-    sim.createSegment('Code', 1024, 250, 'Positive', 0);
-    sim.createSegment('Heap', 1274, 200, 'Positive', 1);
-    sim.createSegment('Stack', 1536, 62, 'Negative', 2);
-
-    $('#pas-input').val(12).change();
-    $('#vas-input').val(10).change();
+    sim.reset();
 });
 
 var sim = class {};
