@@ -24,7 +24,7 @@ An important concept to keep in mind is that the virtual address space itself is
 
 ##### The Physical Address Space (PAS)
 
-Meanwhile, the bottom horizontal bar is the physical address space, and it's size is dictated by the PA (Physical Address) length. It is simple and straightforward when compared to the virtual address space. It's worth noting that the PA length has no hard limits on it's size, but changing it will change the validity of inputs for your VA length and segments. If you change the PA length in a way that causes a conflict, you will be notified of exactly why it occurred. Changes to any input will not take affect unless it is valid.
+Meanwhile, the bottom horizontal bar is the physical address space, and it's size is dictated by the PA (Physical Address) length. It is simple and straightforward when compared to the virtual address space. It's worth noting that the PA length has no hard limits on it's size, but changing it will change the validity of inputs for your VA length and segments. If you change the PA length in a way that causes a conflict, you will be notified of exactly why it occurred. Changes to any input will not take effect unless it is valid.
 
   
 
