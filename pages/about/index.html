@@ -1,2 +1,82 @@
-<h1 class="display-1">About</h1>
-<h6 class="display-6">A segmentation simulator created for my Operating Systems class (CPTR-365)</h6>
+<h3 class="display-3">About</h3>
+<h4 class="text-muted">A segmentation simulator created for my Operating Systems class (CPTR-365)</h4>
+<h6 class="text-muted">Miro Manestar | Professor Robert Ordonez</h6>
+
+&nbsp;
+
+<h5>Introduction</h5>
+<p>
+    The purpose of this simulator is to make it easier to understand how memory virtualization works at a basic, conceptual level in a visual manner.
+    At present, it is limited to three segments, labeled in binary from 00 (0) to 10 (3), but allows for positive and negative growth directions,
+    and custom segment bases and sizes. Furthermore, there is full bounds checking which will alert you appropriately if one of your inputs will result in some kind
+    of conflict within the memory simulation. I will discuss in more detail how it all conceptually works below. You're also free to look through my source code, though it bears
+    almost no resemblance to how such a system would be implemented into an actual system.
+</p>
+
+&nbsp;
+
+<h5>The Virtual Address Space (VAS)</h5>
+<p>
+    Upon first visiting the page, you will see two horizontal "bars" crossing the screen. The top is the virtual address space, and it's size is dictated by the
+    VA (Virtual Address) length input above. The reason the VA length is asked for in bits is because it's stating the number of bits that will be in the virtual
+    memory address that would actually be used by the program during execution time. Thus, if you had a VA length of 10, the maximum number a 10 bit binary address
+    could represent is 1024. Thus, the size of your VAS would be 1024.
+    &nbsp;
+    It's worth noting that your VA length may not be greater than your PA length. To do so while remaining logically consistent would require an explanation of paging
+    which is outside the scope of this visualizer.
+    &nbsp;
+    An important concept to keep in mind is that the virtual address space itself is divided into four sections (And thus has a technical limit of four segments). This
+    is because, in this simulation, the first two bits of the virtual address are used to determine which segment the address will actually be referring to. Meanwhile,
+    the bits after the first two bits represent the offset in each segment. Since two bits can only go up to 4, the number of segments is limited at 4. Furthermore,
+    this also means that the max size of each segment is equal to the total virtual address space size divided by 4, or more generally, 2^(VA Length - 2). The built in
+    bounds checking takes all these considerations into account.
+</p>
+
+&nbsp;
+
+<h5>The Physical Address Space (PAS)</h5>
+<p>
+    Meanwhile, the bottom horizontal bar is the physical address space, and it's size is dictated by the PA (Physical Address) length. It is simple and 
+    straightforward when compared to the virtual address space. It's worth noting that the PA length has no hard limits on it's size, but changing it
+    will change the validity of inputs for your VA length and segments. If you change the PA length in a way that causes a conflict, you will be notified
+    of exactly why it occurred. Changes to any input will not take affect unless it is valid.
+</p>
+
+<h5>Segments</h5>
+<p>
+    Segments represent the discrete sections in memory within the physical address space often allocated to a program. In real world operating systems, there
+    is usually a hard limit on the number of segments, usually 3 or 4. You may know them as the Code, Stack, and Heap. Below the VAS and PAS visualizations is the
+    segmentation table. Here you can change the base, size, and growth direction of the three preprogrammed segments.
+    &nbsp;
+    The base of a segment dictates where it begins in physical memory only. The segment number dictates its position within the virtual address space. Why?
+    Referring back to the section on the virtual address space, if you have a 10 bit virtual address, this means your VAS has 1024 possible addresses. Since the
+    first two bits are used to represent the segment, that leaves 8 bits for the offset within each segment. An 8 bit offset means each segment itself contains
+    only 256 possible addresses. If you convert 256 to a 10-bit binary address, you'll get 0100000000. Since the first two bits are 01, you know that address 256
+    must be in segment 01 (1). The bits after, 00000000, is just 0, so you know it's at offset 0 in segment 01.
+    IMPORTANT: It is for this reason that the size of a segment can not be greater than the offset would allow. Thus, with a VA length of 10, a segment could
+    not have a size greater than 256 in the segmentation table.
+    &nbsp;
+    A confusing aspect of segmentation is growth direction. A positive growth direction is straightforward, but a negative growth direction is a little more confusing.
+    In the physical address space, a negative growth direction means that the segment base, like with a positive growth direction, is still analogous to a physical address.
+    However, the difference is that it extends downwards from that base equivalent to the size. Thus, a negative growing segment that has a base of 50 and a size of 50 would
+    include the physical address 0-50, rather than 50-100 as in a positive growing segment.
+    &nbsp;
+    Within the virtual address space, however, this grows slightly more complicated. Since the base has no bearing on a segments position within the VAS, the only change
+    is the segments position within its allotted section in the VAS. Imagine a 10 bit virtual address. This means each segment is alloted a max size of 256. Now imagine segment
+    00 is it's max size of 256 (Therefore it's final address is 255). Meanwhile, segment 01 has a size of just 12. If segment 01 was positively growing, then virtual address 256
+    will be equivalent to the very first address in segment 01. However, if segment 01 is negatively growing, then the virtual address 256 would result in a segfault. Instead,
+    the first address in segment 01 would be 500, with it's last address being 512. In other words, the segment is simply shifted from the beginning of it's allotted virtual
+    address partition to the end. However, they addresses all still go upward.
+</p>
+
+<h5>Address Translation</h5>
+<p>
+    The final aspect of this simulation is address translation. Address translation takes a decimal input representation of a virtual address, and translates it into a physical
+    address. It also will indicate whether a given virtual address will result in a segfault or not, and will display both the position of the virtual address being translated
+    in both the VAS and PAS. When a segfault occurs, the position indicator of the translated address will turn purple so as to still show it's location even if the virtual
+    address is technically illegal.
+    &nbsp;
+    To translate an address, the decimal input is converted to binary. From there, the first two bits are used to determine which segment from the segmentation table to
+    reference. Once the correct segment has been found, it uses the base, size, and growth direction to calculate the physical address and does some bounds checking.
+    Finally, it does some really irritating math to render the location accurately within the visualizer.
+</p>

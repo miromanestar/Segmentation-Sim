@@ -422,7 +422,6 @@ var Sim = class {
 
     drawTranslatedAddress(sno, offset, fullVAddress) {
         let vMemSize = parseInt(Math.pow(2, parseInt(this.vLength)));
-
         //Throw an error if the virtual address is outside the bounds of the VA space
         if (fullVAddress < 0 || fullVAddress > vMemSize) {
             throw new Error('The virtual address is outside the bounds of the virtual address space');
@@ -438,12 +437,12 @@ var Sim = class {
 
         //The physical address given the virtual address
         //When negative, using base - offset instead of base - size + offset causes the virtual address to be mapped negatively to negatively growing segments.
-        let pAddress = dir === 'Positive' ? base + offset : (base - size + offset) - (vMemSize - size);
+        let pAddress = dir === 'Positive' ? base + offset : (base - size + offset) - (vMemSize/4 - size);
         let relativePasPos = pAddress / Math.pow(2, parseInt(this.pLength)) * $('#pas-area').width();
-        let relativeVasPos = fullVAddress / (vMemSize * 4) * $('#vas-area').width();
+        let relativeVasPos = fullVAddress / vMemSize * $('#vas-area').width();
 
         //Throw an error an exit function if the translated address is outside the bounds of a segment's physical bounds
-        if (dir === 'Positive' ? pAddress > base + size : pAddress < base - size || !base) {
+        if ( (dir === 'Positive' ? pAddress > base + size : pAddress < base - size) || !base) {
             //As per ProfO's request, draw the translated address with a different color if segfault in the VAS
             if ($('#vas-area .translate-seg').length) {
                 $('#vas-area .translate-seg').css('left', relativeVasPos).addClass('segfault');
@@ -455,7 +454,6 @@ var Sim = class {
                 `);
             }
             $('#pas-area .translate-seg').remove();
-
             throw new Error('pAddress out of bounds of a physical address');
         }
 
@@ -515,7 +513,7 @@ var Sim = class {
             return {
                 result: false,
                 msg: `Segment ${ binary(s.number, 2) } is larger than your virtual address allows.\n
-                VA Length: ${ num } | Offset: ${ parseInt(num) - 2 }\n
+                VA Length: ${ this.vLength } | Offset: ${ parseInt(this.vLength) - 2 }\n
                 VA Size: ${ Math.pow(2, parseInt(this.vLength) - 2) }\n
                 Segment Size: ${ s.size }
                 `
