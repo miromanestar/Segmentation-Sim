@@ -403,9 +403,8 @@ var Sim = class {
 
             if (seg.size > vSize) {
                 this.toast(`Segment ${ binary(seg.number, 2) } is larger than your virtual address allows.\n
-                VA Length: ${ num } | Offset: ${ parseInt(num) - 2 }\n
-                VA Size: ${ vSize }\n
-                Segment Size: ${ seg.size }
+                Max Size: ${ vSize }\n
+                Attempted Size: ${ seg.size }
                 `, 'error')
                 $('#vas-input').val(this.vLength);
                 return;
@@ -610,9 +609,8 @@ var Sim = class {
             return {
                 result: false,
                 msg: `Segment ${ binary(s.number, 2) } is larger than your virtual address allows. <br />
-                VA Length: ${ this.vLength } | Offset: ${ parseInt(this.vLength) - 2 } <br />
-                VA Size: ${ Math.pow(2, parseInt(this.vLength) - 2) } <br />
-                Segment Size: ${ s.size }
+                Max Size: ${ Math.pow(2, parseInt(this.vLength) - 2) } <br />
+                Attempted Size: ${ s.size }
                 `,
                 error: 'OUTSIDE_OFFSET'
             };
@@ -648,6 +646,7 @@ var Sim = class {
     
             $('#pas-input').val(12).change();
             $('#vas-input').val(10).change();
+            this.toast('Successfully loaded defaults');
         } else {
             let defaults = JSON.parse(localStorage.getItem('simDefaults'));
             for (let segno in defaults.segments.items) {
@@ -658,6 +657,7 @@ var Sim = class {
             $('#pas-input').val(defaults.pLength).change();
             $('#vas-input').val(defaults.vLength).change();
             $('#translation-input').val(defaults.translatedAddress).trigger('oninput');
+            this.toast('Successfully loaded user defaults', 'success');
         }
     }
 
@@ -669,7 +669,7 @@ var Sim = class {
             segments: this.segments
         }));
 
-        this.toast('Successfully loaded user defaults', 'success');
+        this.toast('Successfully set user defaults', 'success');
     }
 
     toast(msg, type) {
