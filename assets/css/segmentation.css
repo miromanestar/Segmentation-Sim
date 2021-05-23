@@ -78,7 +78,7 @@
 }
 
 .sim-divider {
-    height: 170px;
+    height: 149px;
 }
 
 .sim-axis {
@@ -112,6 +112,7 @@
     margin-top: 20px;
     margin-left: auto;
     margin-right: auto;
+    overflow-y: hidden;
 }
 
 #seg-table {
@@ -155,6 +156,14 @@
     margin: 0;
     padding: 0;
     visibility: hidden;
+}
+
+/* Toast Alert CSS */
+.toast-container {
+    position: fixed;
+    bottom: 30;
+    right: 30;
+    z-index: 5;
 }
 
 /* Bootstrap Striped Table Override */

@@ -20,6 +20,7 @@ var Sim = class {
             items: {} 
         }
 
+        this.toastCount = 0;
         window.addEventListener('resize', ev => this.handleResize());
     }
 
@@ -33,9 +34,9 @@ var Sim = class {
             direction: direction
         }
 
-        let check = this.checkBounds(segment);
-        if (!check.result) {
-            alert(check.msg);
+        let check = this.validateSeg(segment);
+        if (!check.result && check.error !== 'IS_EMPTY') {
+            this.toast(check.msg, 'error');
             return;
         }
 
@@ -88,15 +89,20 @@ var Sim = class {
             let temp = this.segments.items[sno].base;
             this.segments.items[sno].base = base;
 
-            let check = this.checkBounds(this.segments.items[sno]);
+            let check = this.validateSeg(this.segments.items[sno]);
 
             if (check.result) {
                 this.drawSegments();
-            } else {
-                alert(check.msg);
+            } else if (check.error !== 'IS_EMPTY') {
+                this.toast(check.msg, 'error');
                 $(`#base-input_${ sno }`).val(temp)
                 this.segments.items[sno].base = temp;
             }
+        } else {
+            this.segments.items[sno].base = undefined;
+            let check = this.validateSeg(this.segments.items[sno]);
+            if (!check.result)
+                this.hideSeg(sno);
         }
     }
 
@@ -105,15 +111,20 @@ var Sim = class {
             let temp = this.segments.items[sno].size;
             this.segments.items[sno].size = size;
 
-            let check = this.checkBounds(this.segments.items[sno]);
-
+            let check = this.validateSeg(this.segments.items[sno]);
+            
             if (check.result) {
                 this.drawSegments();
-            } else {
-                alert(check.msg);
+            } else if (check.error !== 'IS_EMPTY') {
+                this.toast(check.msg, 'error');
                 $(`#size-input_${ sno }`).val(temp)
                 this.segments.items[sno].size = temp;
             }
+        } else {
+            this.segments.items[sno].size = undefined;
+            let check = this.validateSeg(this.segments.items[sno]);
+            if (!check.result)
+                this.hideSeg(sno);
         }
     }
 
@@ -122,16 +133,24 @@ var Sim = class {
             let temp = this.segments.items[sno].direction;
             this.segments.items[sno].direction = dir;
 
-            let check = this.checkBounds(this.segments.items[sno]);
+            let check = this.validateSeg(this.segments.items[sno]);
 
             if (check.result) {
                 this.drawSegments();
             } else {
-                alert(check.msg);
+                this.toast(check.msg, 'error');
                 $(`#dir-input_${ sno }`).val(temp)
                 this.segments.items[sno].direction = temp;
             }
         }
+    }
+
+    hideSeg(sno) {
+        $(`#vas-seg_${ sno }, #pas-seg_${ sno }`).width(0);
+        $(`#vas-seg_${ sno } .seg-identifier, #pas-seg_${ sno } .seg-identifier`).css('font-size', '0');
+        setTimeout(() => {
+            $(`#vas-seg_${ sno }, #pas-seg_${ sno }`).hide();
+        }, 300);
     }
 
     drawSegments() {
@@ -155,7 +174,14 @@ var Sim = class {
 
         let size = Math.pow(2, this.pLength);
         let relativePos = (s.base / size) * length;
-        let relativeSize = (s.size / size) * length; 
+        let relativeSize = (s.size / size) * length;
+
+        let shouldRender = true;
+        if (isNaN(relativeSize)|| isNaN(relativePos)) {
+            relativeSize = 0;
+            relativePos = 0;
+            shouldRender = false;
+        }
 
         let style = `
             left: ${ s.direction !== 'Negative' ? relativePos : relativePos - relativeSize }; 
@@ -163,6 +189,7 @@ var Sim = class {
             background-color: ${ s.direction !== 'Negative' ? 'blue' : 'red' };
         `;
 
+        $(`#pas-seg_${ s.number }`).show();
         if ($(`#pas-seg_${ s.number }`).length) {
             $(`#pas-seg_${ s.number }`).attr('style', style);
         } else {
@@ -173,6 +200,10 @@ var Sim = class {
             `);
         }
 
+        if (!shouldRender)
+            $(`#pas-seg_${ s.number }`).hide();
+
+        $(`#pas-seg_${ s.number } .seg-identifier`).css('font-size', '');
         setTimeout(function() {
             fitty(`#pas-seg_${ s.number } .seg-identifier`, { maxSize: 45 });
         }, 120);
@@ -204,12 +235,20 @@ var Sim = class {
 
         let relativeSize = calcRelSize();
 
+        let shouldRender = true;
+        if (isNaN(relativeSize)|| isNaN(relativePos)) {
+            relativeSize = 0;
+            relativePos = 0;
+            shouldRender = false;
+        }
+
         let style = `
             left: ${ s.direction !== 'Negative' ? relativePos : nextRelativePos - relativeSize }; 
             width: ${ relativeSize };
             background-color: ${ s.direction !== 'Negative' ? 'blue' : 'red' };
         `;
-
+        
+        $(`#vas-seg_${ s.number }`).show();
         if ($(`#vas-seg_${ s.number }`).length) {
             $(`#vas-seg_${ s.number }`).attr('style', style);
         } else {
@@ -220,6 +259,10 @@ var Sim = class {
             `);
         }
 
+        if (!shouldRender)
+            $(`#vas-seg_${ s.number }`).hide();
+
+        $(`#vas-seg_${ s.number } .seg-identifier`).css('font-size', '');
         setTimeout(function() {
             fitty(`#vas-seg_${ s.number } .seg-identifier`, { maxSize: 45 });
         }, 120);
@@ -254,7 +297,7 @@ var Sim = class {
             else if (i === 8)
                 style = `right: ${ 5 };`;
             else
-                style = `left : ${ relativePos - ((relativePos.toString().length - 1) * 4.5) }`
+                style = `left : ${ relativePos - ((realPos.toString().length - 1) * 5.5) }`
 
             if ($(`#pas-axis_${ i }`).length) {
                 $(`#pas-axis_${ i }`).attr('style', style).html(Math.round(realPos));
@@ -291,20 +334,21 @@ var Sim = class {
             let realPos = (i * .25) * vasSize;
             let relativePos = (realPos / vasSize) * length;
             let rawRelativePos = relativePos;
-            
+            let axisValue = i * Math.pow(2, parseInt(this.vLength - 2));
+
             let style = `left: ${ relativePos - 6 };`;
             if (i === 0)
                 style = `left: ${ relativePos + 3 };`;
             else if (i === 4)
                 style = `right: ${ 5 };`;
             else
-                style = `left : ${ relativePos - ((relativePos.toString().length - 1) * 4.5) }`
+                style = `left : ${ relativePos - ((axisValue.toString().length - 1) * 5.5) }`
 
             if ($(`#vas-axis_${ i }`).length) {
-                $(`#vas-axis_${ i }`).attr('style', style).html( i * Math.pow(2, parseInt(this.vLength - 2)) );
+                $(`#vas-axis_${ i }`).attr('style', style).html(axisValue);
             } else {
                 $('#vas-area').append(`
-                <div class="sim-axis" id="vas-axis_${ i }" style="${ style }">${ i * Math.pow(2, parseInt(this.vLength - 2)) }</div>
+                <div class="sim-axis" id="vas-axis_${ i }" style="${ style }">${ axisValue }</div>
                 `);
             }
 
@@ -321,7 +365,7 @@ var Sim = class {
     //Sets the length of the virtual address in bits
     setPas(num) {
         if (parseInt(num) < parseInt(this.vLength) + 1) {
-            alert('Your physical address length must be greater than your virtual address length');
+            this.toast('Your physical address length must be greater than your virtual address length', 'error');
             $('#pas-input').val(this.pLength);
             return;
         }
@@ -334,7 +378,7 @@ var Sim = class {
     //Sets the length of the physical address in bits
     setVas(num) {
         if (!this.pLength) {
-            alert('Please set a physical address length');
+            this.toast('Please set a physical address length', 'error');
             $('#vas-input').val(this.vLength);
             return;
         } else if (num === '') { 
@@ -343,11 +387,11 @@ var Sim = class {
             this.drawSegments();
             return;
         } else if (num && parseInt(num) > parseInt(this.pLength)) {
-            alert(`Your VA length should be less than your PA length\nVA Length: ${ num }`);
+            this.toast(`Your VA length should be less than your PA length\nVA Length: ${ num }`, 'error');
             $('#vas-input').val(this.vLength);
             return;
         } else if (num <= 2) {
-            alert('Your VA length must be greater than 2 (Because the first two bits are used to identify segment');
+            this.toast(`Your VA length must be greater than 2 (Because the first two bits are used to identify segment)`, 'error');
             $('#vas-input').val(this.vLength);
             return;
         }
@@ -358,11 +402,11 @@ var Sim = class {
             let seg = this.segments.items[s];
 
             if (seg.size > vSize) {
-                alert(`Segment ${ binary(seg.number, 2) } is larger than your virtual address allows.\n
+                this.toast(`Segment ${ binary(seg.number, 2) } is larger than your virtual address allows.\n
                 VA Length: ${ num } | Offset: ${ parseInt(num) - 2 }\n
                 VA Size: ${ vSize }\n
                 Segment Size: ${ seg.size }
-                `);
+                `, 'error')
                 $('#vas-input').val(this.vLength);
                 return;
             }
@@ -377,7 +421,7 @@ var Sim = class {
     translateAddress(num, isSilent) {
         if (!this.vLength) {
             if (!isSilent) {
-                alert('You must enter a virtual address length');
+                this.toast('You must enter a virtual address length', 'error')
                 $('#translation-input').val('');
             }
 
@@ -433,7 +477,7 @@ var Sim = class {
             base = parseInt(this.segments.items[parseInt(sno, 2)].base)
             size = parseInt(this.segments.items[parseInt(sno, 2)].size)
             dir = this.segments.items[parseInt(sno, 2)].direction;
-        } catch(e) {};
+        } catch(e) {}
 
         //The physical address given the virtual address
         //When negative, using base - offset instead of base - size + offset causes the virtual address to be mapped negatively to negatively growing segments.
@@ -480,13 +524,61 @@ var Sim = class {
         }
     }
 
-    //Checks bounds within the PAS
-    checkBounds(s) {
+    //Does all the checks required for slapping the user if they try to do something mentally deficient when entering segment inputs
+    //Returns an object with a boolean result and a custom message.
+    validateSeg(s) {
+        //If either the size, base, or direction of the segment is empty, then it doesn't even exist
+        if (!s.size || !s.base || !s.direction) {
+            return {
+                result: false,
+                msg: `Segment ${ s.number } has one or more empty inputs and therefore will not be rendered.`,
+                error: 'IS_EMPTY'
+            };
+        }
+
+        //Variables for determining the actual address range of segments in the PAS
         let start = s.direction === 'Positive' ? parseInt(s.base) : parseInt(s.base) - parseInt(s.size);
         let end = start + parseInt(s.size);
+
+        //Calculates the total size of the PAS
         let size = Math.pow(2, parseInt(this.pLength));
 
+        //The base and size of a segment must be whole numbers
+        if (!Number.isInteger(parseInt(s.size))) {
+            return {
+                result: false,
+                msg: `Size must be a whole number`,
+                error: 'IS_DECIMAL'
+            };
+        }
+
+        if (!Number.isInteger(parseInt(s.base))) {
+            return {
+                result: false,
+                msg: `Base must be a whole number`,
+                error: 'IS_DECIMAL'
+            };
+        }
+
+        //The base and size cannot be negative
+        if (parseInt(s.size) < 0) {
+            return {
+                result: false,
+                msg: `Size must be 0 or greater`,
+                error: 'IS_NEGATIVE'
+            };
+        }
+
+        if (parseInt(s.base) < 0) {
+            return {
+                result: false,
+                msg: `Base must be 0 or greater`,
+                error: 'IS_NEGATIVE'
+            };
+        }
+
         for (let segno in this.segments.items) {
+            //Must ignore the segment currently being modified
             if (parseInt(segno) === parseInt(s.number))
                 continue;
 
@@ -494,35 +586,42 @@ var Sim = class {
             let seg_start = seg.direction === 'Positive' ? parseInt(seg.base) : parseInt(seg.base) - parseInt(seg.size);
             let seg_end = seg_start + parseInt(seg.size);
 
+            //Determining whether the new inputs of a segment overlap with another existing segment within the PAS
             if (start < seg_end && seg_start < end) {
                     return {
                         result: false,
-                        msg: `Segment ${ binary(s.number, 2) } bounds overlaps with segment ${ binary(seg.number, 2) }`
-                    }
+                        msg: `Segment ${ binary(s.number, 2) } bounds overlaps with segment ${ binary(seg.number, 2) }`,
+                        error: 'SEGMENT_OVERLAP'
+                    };
             }
 
+            //A segment cannot go beyond the bounds of the PAS
             if (end > size || start > size) {
                 return {
                     result: false,
-                    msg: `Segment ${ binary(s.number, 2) } goes beyond length of address space`
-                }
+                    msg: `Segment ${ binary(s.number, 2) } goes beyond length of address space`,
+                    error: 'OUTSIDE_BOUNDS'
+                };
             }
         }
 
+        //The size of a segment cannot be greater than the max offset per segment, size per segment is 2^(vLength - 2)
         if (parseInt(s.size) > Math.pow(2, parseInt(this.vLength) - 2)) {
             return {
                 result: false,
-                msg: `Segment ${ binary(s.number, 2) } is larger than your virtual address allows.\n
-                VA Length: ${ this.vLength } | Offset: ${ parseInt(this.vLength) - 2 }\n
-                VA Size: ${ Math.pow(2, parseInt(this.vLength) - 2) }\n
+                msg: `Segment ${ binary(s.number, 2) } is larger than your virtual address allows. <br />
+                VA Length: ${ this.vLength } | Offset: ${ parseInt(this.vLength) - 2 } <br />
+                VA Size: ${ Math.pow(2, parseInt(this.vLength) - 2) } <br />
                 Segment Size: ${ s.size }
-                `
-            }
+                `,
+                error: 'OUTSIDE_OFFSET'
+            };
         }
 
         return {
             result: true,
-            msg: `Segment ${ binary(s.number, 2) } fits within bounds`
+            msg: `Segment ${ binary(s.number, 2) } is valid`,
+            error: 'NONE'
         };
     }
 
@@ -540,12 +639,62 @@ var Sim = class {
             items: {} 
         };
 
-        sim.createSegment('Code', 1024, 250, 'Positive', 0);
-        sim.createSegment('Heap', 1274, 200, 'Positive', 1);
-        sim.createSegment('Stack', 1536, 62, 'Negative', 2);
+        if (!localStorage.getItem('simDefaults')) {
+            this.createSegment('Code', 1024, 250, 'Positive', 0);
+            this.createSegment('Heap', 1274, 200, 'Positive', 1);
+            this.createSegment('Stack', 1536, 62, 'Negative', 2);
+            this.createSegment('Extra', undefined, undefined, 'Positive', 3);
+    
+    
+            $('#pas-input').val(12).change();
+            $('#vas-input').val(10).change();
+        } else {
+            let defaults = JSON.parse(localStorage.getItem('simDefaults'));
+            for (let segno in defaults.segments.items) {
+                let seg = defaults.segments.items[segno];
+                this.createSegment(seg.name, seg.base, seg.size, seg.direction, seg.number);
+            }
 
-        $('#pas-input').val(12).change();
-        $('#vas-input').val(10).change();
+            $('#pas-input').val(defaults.pLength).change();
+            $('#vas-input').val(defaults.vLength).change();
+            $('#translation-input').val(defaults.translatedAddress).trigger('oninput');
+        }
+    }
+
+    setDefaults() {
+        localStorage.setItem('simDefaults', JSON.stringify({
+            pLength: this.pLength,
+            vLength: this.vLength,
+            translatedAddress: $('#translation-input').val(),
+            segments: this.segments
+        }));
+
+        this.toast('Successfully loaded user defaults', 'success');
+    }
+
+    toast(msg, type) {
+        let color = 'bg-primary';
+        if (type === 'error')
+            color = 'bg-danger'
+        else if (type === 'success')
+            color = 'bg-success'
+        
+        const toast = `
+        <div class="toast align-items-center text-white ${ color } border-0" role="alert" aria-live="assertive" aria-atomic="true" id="toast_${ this.toastCount }">
+            <div class="d-flex">
+            <div class="toast-body">
+                ${ msg }
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+        `;
+
+        $('.toast.hide').remove();
+        $('.toast-container').prepend(toast);
+        $('.toast').toast('show');
+        $(`#toast_${ this.toastCount - 3 }`).fadeOut('slow', function() { $(this).remove(); });
+        this.toastCount++;
     }
 };
 

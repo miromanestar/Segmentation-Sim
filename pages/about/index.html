@@ -75,7 +75,7 @@
     00 is it's max size of 256 (Therefore it's final address is 255). Meanwhile, segment 01 has a size of just 12. If segment 01 was positively growing, then virtual address 256
     will be equivalent to the very first address in segment 01. However, if segment 01 is negatively growing, then the virtual address 256 would result in a segfault. Instead,
     the first address in segment 01 would be 500, with it's last address being 512. In other words, the segment is simply shifted from the beginning of it's allotted virtual
-    address partition to the end. However, they addresses all still go upward.
+    address partition to the end. However, the addresses all still go upward.
 </p>
 
 <br />
