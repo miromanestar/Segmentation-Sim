@@ -67,7 +67,7 @@
     A confusing aspect of segmentation is growth direction. A positive growth direction is straightforward, but a negative growth direction is a little more confusing.
     In the physical address space, a negative growth direction means that the segment base, like with a positive growth direction, is still analogous to a physical address.
     However, the difference is that it extends downwards from that base equivalent to the size. Thus, a negative growing segment that has a base of 50 and a size of 50 would
-    include the physical address 0-50, rather than 50-100 as in a positive growing segment.
+    include the physical address 1-50, rather than 50-99 as in a positive growing segment.
     <br />
     <br />
     Within the virtual address space, however, this grows slightly more complicated. Since the base has no bearing on a segments position within the VAS, the only change
