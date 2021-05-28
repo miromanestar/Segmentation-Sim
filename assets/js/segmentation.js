@@ -115,6 +115,22 @@ var Sim = class {
             
             if (check.result) {
                 this.drawSegments();
+                
+                //Determine the minimum viable VA length now 
+                this.vLengthMin = 0;
+                for (let s in this.segments.items) {
+                    let seg = this.segments.items[s];
+                    let bitSize = (parseInt(seg.size) - 1).toString(2).length;
+                    if (bitSize > this.vLengthMin) {
+                        this.vLengthMin = bitSize;
+                    }
+                }
+                
+                //Now let's determine the percentage a gradient could be to give user feedback for max/min of VA length
+                let gradPercent = (parseInt(this.vLength) - (parseInt(this.vLengthMin) + 2)) / (parseInt(this.pLength) - (parseInt(this.vLengthMin) + 2));
+                $('#vas-progress-bar').width(`${ gradPercent * 100 }%`);
+                console.log(this.vLengthMin)
+                
             } else if (check.error !== 'IS_EMPTY') {
                 this.toast(check.msg, 'error');
                 $(`#size-input_${ sno }`).val(temp)
@@ -362,20 +378,24 @@ var Sim = class {
         }
     }
 
-    //Sets the length of the virtual address in bits
+    //Sets the length of the physical address in bits
     setPas(num) {
         if (parseInt(num) < parseInt(this.vLength) + 1) {
             this.toast('Your physical address length must be greater than your virtual address length', 'error');
             $('#pas-input').val(this.pLength);
             return;
         }
+        
+        //Now let's determine the percentage a gradient could be to give user feedback for max/min of VA length
+        let gradPercent = (parseInt(this.vLength) - (parseInt(this.vLengthMin) + 2)) / (parseInt(num) - (parseInt(this.vLengthMin) + 2));
+        $('#vas-progress-bar').width(`${ gradPercent * 100 }%`);
 
         this.pLength = num;
         this.pAxis();
         this.drawSegments();
     }
 
-    //Sets the length of the physical address in bits
+    //Sets the length of the virtual address in bits
     setVas(num) {
         if (!this.pLength) {
             this.toast('Please set a physical address length', 'error');
@@ -383,11 +403,12 @@ var Sim = class {
             return;
         } else if (num === '') { 
             this.vLength = num;
+            $('#vas--progress-bar').width(0);
             this.vAxis();
             this.drawSegments();
             return;
         } else if (num && parseInt(num) > parseInt(this.pLength)) {
-            this.toast(`Your VA length should be less than your PA length\nVA Length: ${ num }`, 'error');
+            this.toast(`Your VA length should be less than your PA length`, 'error');
             $('#vas-input').val(this.vLength);
             return;
         } else if (num <= 2) {
@@ -396,19 +417,32 @@ var Sim = class {
             return;
         }
 
-        //Total size (in bytes) of a virtual segment
-        let vSize = Math.pow(2, parseInt(num) - 2);
+        //Find the minimum amount of bits allowed to fit segment within bounds of a segment space, set as lower bound of gradient
+        this.vLengthMin = 0;
+        let tempSeg = 0; //The segment which has been identified as the biggest segment
         for (let s in this.segments.items) {
             let seg = this.segments.items[s];
-
-            if (seg.size > vSize) {
-                this.toast(`Segment ${ binary(seg.number, 2) } is larger than your virtual address allows.\n
-                Max Size: ${ vSize }\n
-                Attempted Size: ${ seg.size }
-                `, 'error')
-                $('#vas-input').val(this.vLength);
-                return;
+            let bitSize = (parseInt(seg.size) - 1).toString(2).length;
+            if (bitSize > this.vLengthMin) {
+                this.vLengthMin = bitSize;
+                tempSeg = seg;
             }
+        }
+        
+        //Now let's determine the percentage a gradient could be to give user feedback for max/min of VA length
+        let gradPercent = (parseInt(num) - (parseInt(this.vLengthMin) + 2)) / (parseInt(this.pLength) - (parseInt(this.vLengthMin) + 2));
+        $('#vas-progress-bar').width(`${ gradPercent * 100 }%`);
+
+
+        //Total size (in bytes) of a virtual segment
+        let vSize = Math.pow(2, parseInt(num) - 2);
+        if (gradPercent < 0) {
+            this.toast(`Segment ${ binary(tempSeg.number, 2) } is larger than your virtual address allows. <br />
+            Max Size: ${ vSize } <br />
+            Attempted Size: ${ tempSeg.size }
+            `, 'error')
+            $('#vas-input').val(this.vLength);
+            return;
         }
 
         this.vLength = num;

@@ -50,14 +50,14 @@
     align-items: center;
     top: 0;
     border: 1px solid white;
-    transition: .3s;
+    transition: .2s;
 }
 
 .translate-seg {
     width: 5px;
     background-color: lightblue;
     z-index: 7;
-    transition: .1s;
+    transition: .2s;
 }
 
 .segfault {
@@ -170,4 +170,21 @@
 .table>:not(caption)>*>* {
     background-color: var(--secondary-color);
     box-shadow: inset 0 0 0 9999px var(--tertiary-color);
+}
+
+/* Vas Input Progress Bar */
+
+#vas-span {
+    position: relative;
+}
+
+#vas-progress-bar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    background-color: red;
+    opacity: .2;
+    transition: .2s;
+    pointer-events: none;
 }

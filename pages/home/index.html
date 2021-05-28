@@ -11,7 +11,10 @@
 
         <span>
             <label>VA Length (Bits): </label>
-            <input id="vas-input" type="number" min="0" max="512" class="minimal-input" onchange="sim.setVas($(this).val())" placeholder="VA Length (Bits)" style="width: 150px;" required/>
+            <span id="vas-span">
+                <input id="vas-input" type="number" min="0" max="512" class="minimal-input" onchange="sim.setVas($(this).val())" placeholder="VA Length (Bits)" style="width: 150px;" required />
+                <div id="vas-progress-bar"></div>
+            </span>
         </span>
     </span>
 
