@@ -403,7 +403,7 @@ var Sim = class {
             return;
         } else if (num === '') { 
             this.vLength = num;
-            $('#vas--progress-bar').width(0);
+            $('#vas-progress-bar').width(0);
             this.vAxis();
             this.drawSegments();
             return;

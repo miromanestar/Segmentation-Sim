@@ -1,4 +1,4 @@
-A segmentation simulator created for my Operating Systems class (CPTR-365)
+A segmentation simulator created for Operating Systems (CPTR-365)
 ==========================================================================
 
 ###### Miro Manestar | Professor Robert Ordonez
