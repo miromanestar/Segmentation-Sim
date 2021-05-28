@@ -408,7 +408,7 @@ var Sim = class {
             this.drawSegments();
             return;
         } else if (num && parseInt(num) > parseInt(this.pLength)) {
-            this.toast(`Your VA length should be less than your PA length`, 'error');
+            this.toast(`Your VA length should be less than or equal to your PA length`, 'error');
             $('#vas-input').val(this.vLength);
             return;
         } else if (num <= 2) {
