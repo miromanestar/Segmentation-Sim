@@ -671,7 +671,30 @@ var Sim = class {
             items: {} 
         };
 
-        if (!localStorage.getItem('simDefaults')) {
+        try {
+            if (!localStorage.getItem('simDefaults')) {
+                this.createSegment('Code', 1024, 250, 'Positive', 0);
+                this.createSegment('Heap', 1274, 200, 'Positive', 1);
+                this.createSegment('Stack', 1536, 62, 'Negative', 2);
+                this.createSegment('Extra', undefined, undefined, 'Positive', 3);
+        
+        
+                $('#pas-input').val(12).change();
+                $('#vas-input').val(10).change();
+                this.toast('Successfully loaded defaults', 'success');
+            } else {
+                let defaults = JSON.parse(localStorage.getItem('simDefaults'));
+                for (let segno in defaults.segments.items) {
+                    let seg = defaults.segments.items[segno];
+                    this.createSegment(seg.name, seg.base, seg.size, seg.direction, seg.number);
+                }
+
+                $('#pas-input').val(defaults.pLength).change();
+                $('#vas-input').val(defaults.vLength).change();
+                $('#translation-input').val(defaults.translatedAddress).trigger('oninput');
+                this.toast('Successfully loaded user defaults', 'success');
+            }
+        } catch (e) {
             this.createSegment('Code', 1024, 250, 'Positive', 0);
             this.createSegment('Heap', 1274, 200, 'Positive', 1);
             this.createSegment('Stack', 1536, 62, 'Negative', 2);
@@ -680,28 +703,25 @@ var Sim = class {
     
             $('#pas-input').val(12).change();
             $('#vas-input').val(10).change();
-            this.toast('Successfully loaded defaults');
-        } else {
-            let defaults = JSON.parse(localStorage.getItem('simDefaults'));
-            for (let segno in defaults.segments.items) {
-                let seg = defaults.segments.items[segno];
-                this.createSegment(seg.name, seg.base, seg.size, seg.direction, seg.number);
-            }
 
-            $('#pas-input').val(defaults.pLength).change();
-            $('#vas-input').val(defaults.vLength).change();
-            $('#translation-input').val(defaults.translatedAddress).trigger('oninput');
-            this.toast('Successfully loaded user defaults', 'success');
+            this.toast('Unable to load user defaults', 'error');
+            console.error(e);
         }
     }
 
     setDefaults() {
-        localStorage.setItem('simDefaults', JSON.stringify({
-            pLength: this.pLength,
-            vLength: this.vLength,
-            translatedAddress: $('#translation-input').val(),
-            segments: this.segments
-        }));
+        try {
+            localStorage.setItem('simDefaults', JSON.stringify({
+                pLength: this.pLength,
+                vLength: this.vLength,
+                translatedAddress: $('#translation-input').val(),
+                segments: this.segments
+            }));
+        } catch (e) {
+            this.toast('Unable to set user defaults', 'error');
+            console.error(e);
+            return;
+        }
 
         this.toast('Successfully set user defaults', 'success');
     }
