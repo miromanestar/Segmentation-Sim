@@ -21,7 +21,13 @@ var Sim = class {
         }
 
         this.toastCount = 0;
-        window.addEventListener('resize', ev => this.handleResize());
+        window.addEventListener('resize', ev => {
+            if (ev.origin !== window.location.host);
+            this.handleResize()
+        });
+
+        //The max number of segments allowed
+        this.vasSize = 4;
     }
 
     createSegment(name, base, size, direction, num) {
@@ -234,15 +240,14 @@ var Sim = class {
 
         let length = $('#vas-area').width();
 
-        let vasSize = 4;
-        let realPos = (s.number * .25) * vasSize;
-        let relativePos = (realPos / vasSize) * length;
+        let realPos = (s.number * .25) * this.vasSize;
+        let relativePos = (realPos / this.vasSize) * length;
         
         //Calculates the space between each "segment" grid in the VAS and figures the relative size of each virtual segment
         let nextRelativePos;
         let calcRelSize = () => {
-            let nextPos = ( (s.number + 1) * .25) * vasSize;
-            nextRelativePos = (nextPos / vasSize) * length;
+            let nextPos = ( (s.number + 1) * .25) * this.vasSize;
+            nextRelativePos = (nextPos / this.vasSize) * length;
 
             let actualWidth = nextRelativePos - relativePos;
             let widthRatio = parseInt(s.size) / Math.pow(2, parseInt(this.vLength) - 2);
@@ -344,11 +349,10 @@ var Sim = class {
         }
 
         let length = $('#vas-area').width();
-        let vasSize = 4;
 
         for (let i = 0; i <= 4; i++) {
-            let realPos = (i * .25) * vasSize;
-            let relativePos = (realPos / vasSize) * length;
+            let realPos = (i * .25) * this.vasSize;
+            let relativePos = (realPos / this.vasSize) * length;
             let rawRelativePos = relativePos;
             let axisValue = i * Math.pow(2, parseInt(this.vLength - 2));
 
@@ -438,8 +442,8 @@ var Sim = class {
         let vSize = Math.pow(2, parseInt(num) - 2);
         if (gradPercent < 0) {
             this.toast(`Segment ${ binary(tempSeg.number, 2) } is larger than your virtual address allows. <br />
-            Max Size: ${ vSize } <br />
-            Attempted Size: ${ tempSeg.size }
+            Max  Segment Size: ${ vSize } <br />
+            Segment Size: ${ tempSeg.size }
             `, 'error')
             $('#vas-input').val(this.vLength);
             return;
@@ -643,8 +647,8 @@ var Sim = class {
             return {
                 result: false,
                 msg: `Segment ${ binary(s.number, 2) } is larger than your virtual address allows. <br />
-                Max Size: ${ Math.pow(2, parseInt(this.vLength) - 2) } <br />
-                Attempted Size: ${ s.size }
+                Max Segment Size: ${ Math.pow(2, parseInt(this.vLength) - 2) } <br />
+                Segment Size: ${ s.size }
                 `,
                 error: 'OUTSIDE_OFFSET'
             };
