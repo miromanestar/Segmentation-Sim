@@ -22,8 +22,8 @@ var Sim = class {
 
         this.toastCount = 0;
         window.addEventListener('resize', ev => {
-            if (ev.origin !== window.location.host);
-            this.handleResize()
+            if (ev.origin !== window.location.host)
+                this.handleResize();
         });
 
         //The max number of segments allowed
