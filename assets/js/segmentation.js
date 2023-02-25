@@ -523,7 +523,7 @@ var Sim = class {
         let relativeVasPos = fullVAddress / vMemSize * $('#vas-area').width();
 
         //Throw an error an exit function if the translated address is outside the bounds of a segment's physical bounds
-        if ( (dir === 'Positive' ? pAddress > base + size : pAddress < base - size) || !base) {
+        if ( (dir === 'Positive' ? pAddress >= base + size : pAddress < base - size) || !base) {
             //As per ProfO's request, draw the translated address with a different color if segfault in the VAS
             if ($('#vas-area .translate-seg').length) {
                 $('#vas-area .translate-seg').css('left', relativeVasPos).addClass('segfault');
@@ -677,7 +677,7 @@ var Sim = class {
 
         try {
             if (!localStorage.getItem('simDefaults')) {
-                this.createSegment('Code', 1024, 250, 'Positive', 0);
+                this.createSegment('Code', 1024, 249, 'Positive', 0);
                 this.createSegment('Heap', 1274, 200, 'Positive', 1);
                 this.createSegment('Stack', 1536, 62, 'Negative', 2);
                 this.createSegment('Extra', undefined, undefined, 'Positive', 3);
@@ -699,7 +699,7 @@ var Sim = class {
                 this.toast('Successfully loaded user defaults', 'success');
             }
         } catch (e) {
-            this.createSegment('Code', 1024, 250, 'Positive', 0);
+            this.createSegment('Code', 1024, 249, 'Positive', 0);
             this.createSegment('Heap', 1274, 200, 'Positive', 1);
             this.createSegment('Stack', 1536, 62, 'Negative', 2);
             this.createSegment('Extra', undefined, undefined, 'Positive', 3);
